@@ -1,48 +1,21 @@
-﻿using System;
-using System.Diagnostics;
+using System;
+using HealthMonitor;
 
-class Checker
+/// <summary>
+/// Main class for checking vitals, maintains backward compatibility with original interface
+/// </summary>
+public static class Checker
 {
+    /// <summary>
+    /// Checks if all vital signs are within normal range
+    /// </summary>
+    /// <param name="temperature">Temperature in Fahrenheit</param>
+    /// <param name="pulseRate">Pulse rate in beats per minute</param>
+    /// <param name="spo2">Oxygen saturation percentage</param>
+    /// <returns>True if all vitals are within normal range</returns>
     public static bool VitalsOk(float temperature, int pulseRate, int spo2)
     {
-        if(temperature >102 || temperature < 95)
-        {
-            Console.WriteLine("Temperature critical!");
-            for (int i = 0; i < 6; i++)
-            {
-                Console.Write("\r* ");
-                System.Threading.Thread.Sleep(1000);
-                Console.Write("\r *");
-                System.Threading.Thread.Sleep(1000);
-            }
-            return false;
-        }
-        else if (pulseRate < 60 || pulseRate > 100)
-        {
-            Console.WriteLine("Pulse Rate is out of range!");
-            for (int i = 0; i < 6; i++)
-            {
-                Console.Write("\r* ");
-                System.Threading.Thread.Sleep(1000);
-                Console.Write("\r *");
-                System.Threading.Thread.Sleep(1000);
-            }
-            return false;
-        }
-        else if (spo2 < 90)
-        {
-            Console.WriteLine("Oxygen Saturation out of range!");
-            for (int i = 0; i < 6; i++)
-            {
-                Console.Write("\r* ");
-                System.Threading.Thread.Sleep(1000);
-                Console.Write("\r *");
-                System.Threading.Thread.Sleep(1000);
-            }
-            return false;
-        }
-        Console.WriteLine("Vitals received within normal range");
-        Console.WriteLine("Temperature: {0} Pulse: {1}, SO2: {2}", temperature, pulseRate, spo2);
-        return true;
+        var vitalsChecker = new VitalsChecker();
+        return vitalsChecker.CheckVitals(temperature, pulseRate, spo2);
     }
 }
