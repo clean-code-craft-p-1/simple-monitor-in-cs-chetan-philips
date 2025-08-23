@@ -1,96 +1,69 @@
-using System;
 using System.Collections.Generic;
-using HealthMonitor.Infrastructure;
 using HealthMonitor.Models;
 
 namespace HealthMonitor.Core {
     /// <summary>
-    /// Core vital signs checker that validates readings against normal ranges.
-    /// Supports extensible vital sign checking with patient-specific adjustments.
+    /// Simple, extensible vital signs checker.
+    /// Automatically discovers and checks all available vital signs.
     /// </summary>
     public class VitalsChecker {
         private readonly IVitalSignAlerter _alerter;
-        private readonly IEnumerable<IVitalSign> _vitalSigns;
+        private readonly Dictionary<string, IVitalSign> _vitalCheckers;
 
         public VitalsChecker(IVitalSignAlerter alerter) {
             _alerter = alerter;
-            _vitalSigns = VitalSignFactory.CreateAll();
+            _vitalCheckers = CreateStandardVitalCheckers();
         }
 
         public void CheckVitals(VitalReading vitals, PatientProfile profile = null) {
-            CheckTemperature(vitals.Temperature, profile);
-            CheckPulseRate(vitals.PulseRate, profile);
-            CheckOxygenSaturation(vitals.OxygenSaturation, profile);
-            
-            if (vitals.HasBloodPressure) {
-                CheckBloodPressure(vitals.SystolicBloodPressure, vitals.DiastolicBloodPressure, profile);
+            foreach (var vitalName in vitals.GetVitalNames()) {
+                CheckSingleVital(vitalName, vitals.GetReading(vitalName), profile);
             }
         }
 
         public bool AreAllVitalsWithinRange(VitalReading vitals, PatientProfile profile = null) {
-            bool temperatureOk = CheckTemperature(vitals.Temperature, profile);
-            bool pulseRateOk = CheckPulseRate(vitals.PulseRate, profile);
-            bool oxygenSatOk = CheckOxygenSaturation(vitals.OxygenSaturation, profile);
-            
-            if (vitals.HasBloodPressure) {
-                bool bloodPressureOk = CheckBloodPressure(vitals.SystolicBloodPressure, vitals.DiastolicBloodPressure, profile);
-                return temperatureOk && pulseRateOk && oxygenSatOk && bloodPressureOk;
-            }
-            
-            return temperatureOk && pulseRateOk && oxygenSatOk;
-        }
-
-        private bool CheckTemperature(float temperature, PatientProfile profile) {
-            var tempVitalSign = GetVitalSignByName("Temperature");
-            bool isNormal = tempVitalSign.IsWithinRange(temperature, profile);
-
-            if (!isNormal) {
-                _alerter.Alert("Temperature", temperature.ToString("F1"), tempVitalSign.Unit);
-            }
-
-            return isNormal;
-        }
-
-        private bool CheckPulseRate(float pulseRate, PatientProfile profile) {
-            var pulseVitalSign = GetVitalSignByName("Pulse Rate");
-            bool isNormal = pulseVitalSign.IsWithinRange(pulseRate, profile);
-
-            if (!isNormal) {
-                _alerter.Alert("Pulse Rate", pulseRate.ToString("F0"), pulseVitalSign.Unit);
-            }
-
-            return isNormal;
-        }
-
-        private bool CheckOxygenSaturation(float oxygenSaturation, PatientProfile profile) {
-            var oxygenVitalSign = GetVitalSignByName("Oxygen Saturation");
-            bool isNormal = oxygenVitalSign.IsWithinRange(oxygenSaturation, profile);
-
-            if (!isNormal) {
-                _alerter.Alert("Oxygen Saturation", oxygenSaturation.ToString("F1"), oxygenVitalSign.Unit);
-            }
-
-            return isNormal;
-        }
-
-        private bool CheckBloodPressure(float systolic, float diastolic, PatientProfile profile) {
-            var bloodPressure = GetVitalSignByName("Blood Pressure") as VitalSigns.BloodPressure;
-            bool isNormal = bloodPressure?.IsWithinRange(systolic, diastolic, profile) ?? true;
-
-            if (!isNormal) {
-                _alerter.Alert("Blood Pressure", $"{systolic:F0}/{diastolic:F0}", bloodPressure?.Unit ?? "mmHg");
-            }
-
-            return isNormal;
-        }
-
-        private IVitalSign GetVitalSignByName(string name) {
-            foreach (var vitalSign in _vitalSigns) {
-                if (vitalSign.Name == name) {
-                    return vitalSign;
+            foreach (var vitalName in vitals.GetVitalNames()) {
+                if (!IsVitalWithinRange(vitalName, vitals.GetReading(vitalName), profile)) {
+                    return false;
                 }
             }
-            return VitalSignFactory.Create(name);
+            return true;
+        }
+
+        // Easy way to add new vital signs at runtime
+        public void RegisterVitalSign(IVitalSign vitalSign) {
+            _vitalCheckers[vitalSign.Name] = vitalSign;
+        }
+
+        private void CheckSingleVital(string vitalName, float value, PatientProfile profile) {
+            if (!IsVitalWithinRange(vitalName, value, profile)) {
+                var unit = _vitalCheckers.TryGetValue(vitalName, out var checker) ? checker.Unit : "";
+                _alerter.Alert(vitalName, value.ToString("F1"), unit);
+            }
+        }
+
+        private bool IsVitalWithinRange(string vitalName, float value, PatientProfile profile) {
+            return _vitalCheckers.TryGetValue(vitalName, out var checker) &&
+                   checker.IsWithinRange(value, profile);
+        }
+
+        private static Dictionary<string, IVitalSign> CreateStandardVitalCheckers() {
+            var checkers = new Dictionary<string, IVitalSign>();
+
+            // Register standard vital signs
+            var standardVitals = new IVitalSign[] {
+                new VitalSigns.Temperature(),
+                new VitalSigns.PulseRate(),
+                new VitalSigns.OxygenSaturation(),
+                new VitalSigns.SystolicBloodPressure(),
+                new VitalSigns.DiastolicBloodPressure()
+            };
+
+            foreach (var vital in standardVitals) {
+                checkers[vital.Name] = vital;
+            }
+
+            return checkers;
         }
     }
 }

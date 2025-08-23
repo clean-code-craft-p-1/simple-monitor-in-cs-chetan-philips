@@ -1,4 +1,4 @@
-using HealthMonitor.Infrastructure;
+using HealthMonitor.Core;
 
 namespace HealthMonitor.Tests {
     /// <summary>

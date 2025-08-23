@@ -1,9 +1,8 @@
 using System;
 
-namespace HealthMonitor.Infrastructure {
+namespace HealthMonitor.Core {
     /// <summary>
-    /// Console-based implementation of vital sign alerting.
-    /// Outputs alerts to the console for demonstration purposes.
+    /// Simple console-based alerter.
     /// </summary>
     public class VitalSignAlerter : IVitalSignAlerter {
         public void Alert(string vitalName, string value, string unit) {

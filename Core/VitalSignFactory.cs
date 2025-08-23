@@ -34,7 +34,7 @@ namespace HealthMonitor.Core {
                 VitalSignType.Temperature => new Temperature(),
                 VitalSignType.PulseRate => new PulseRate(),
                 VitalSignType.OxygenSaturation => new OxygenSaturation(),
-                VitalSignType.BloodPressure => new BloodPressure(),
+                VitalSignType.BloodPressure => new SystolicBloodPressure(),
                 _ => throw new ArgumentException($"Unknown vital sign type: {type}", nameof(type))
             };
         }
@@ -47,10 +47,10 @@ namespace HealthMonitor.Core {
         /// <exception cref="ArgumentException">Thrown when an unknown vital sign name is provided</exception>
         public static IVitalSign Create(string name) {
             return name switch {
-                "Temperature" => new Temperature(),
-                "Pulse Rate" => new PulseRate(),
-                "Oxygen Saturation" => new OxygenSaturation(),
-                "Blood Pressure" => new BloodPressure(),
+                "Temperature" => new VitalSigns.Temperature(),
+                "Pulse Rate" => new VitalSigns.PulseRate(),
+                "Oxygen Saturation" => new VitalSigns.OxygenSaturation(),
+                "Blood Pressure" => new VitalSigns.SystolicBloodPressure(),
                 _ => throw new ArgumentException($"Unknown vital sign: {name}")
             };
         }
@@ -60,10 +60,10 @@ namespace HealthMonitor.Core {
         /// </summary>
         /// <returns>Enumerable of all standard vital sign implementations</returns>
         public static IEnumerable<IVitalSign> CreateAll() {
-            yield return new Temperature();
-            yield return new PulseRate();
-            yield return new OxygenSaturation();
-            yield return new BloodPressure();
+            yield return new VitalSigns.Temperature();
+            yield return new VitalSigns.PulseRate();
+            yield return new VitalSigns.OxygenSaturation();
+            yield return new VitalSigns.SystolicBloodPressure();
         }
     }
 }
