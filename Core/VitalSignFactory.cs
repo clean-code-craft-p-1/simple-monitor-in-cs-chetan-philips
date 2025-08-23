@@ -1,4 +1,5 @@
 ﻿using System;
+
 using HealthMonitor.VitalSigns;
 
 namespace HealthMonitor.Core {

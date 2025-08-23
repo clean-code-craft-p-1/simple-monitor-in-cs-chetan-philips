@@ -5,7 +5,9 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <OutputType>Exe</OutputType>
-    <StartupObject>HealthMonitor.Checker</StartupObject>
+		<StartupObject>HealthMonitor.Program</StartupObject>
+    <RootNamespace>HealthMonitor</RootNamespace>
+    <AssemblyName>HealthMonitor</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

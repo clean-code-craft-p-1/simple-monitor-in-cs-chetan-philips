@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+
 using HealthMonitor.Core;
 using HealthMonitor.Models;
 
@@ -19,14 +20,14 @@ namespace HealthMonitor.Tests {
             TestPatientSpecificRanges();
             TestAlerterBehavior();
             TestNullInputHandling();
-            Console.WriteLine("? All tests completed successfully!");
+            Console.WriteLine("All tests completed successfully!");
         }
 
         /// <summary>
         /// Tests that normal vital signs are correctly identified as within range.
         /// </summary>
         static void TestNormalVitals() {
-            var checker = new VitalsChecker(new TestAlerter());
+            var checker = new VitalsChecker(new VitalSignAlerterTests());
             var normalVitals = new VitalReading(98.6f, 72, 95);
 
             Debug.Assert(checker.AreAllVitalsWithinRange(normalVitals),
@@ -37,7 +38,7 @@ namespace HealthMonitor.Tests {
         /// Tests boundary conditions at the edge of normal ranges.
         /// </summary>
         static void TestBoundaryConditions() {
-            var checker = new VitalsChecker(new TestAlerter());
+            var checker = new VitalsChecker(new VitalSignAlerterTests());
 
             // Test minimum boundary values
             var minBoundary = new VitalReading(95.0f, 60, 90);
@@ -64,7 +65,7 @@ namespace HealthMonitor.Tests {
         /// Tests that clearly out-of-range vitals are correctly identified.
         /// </summary>
         static void TestOutOfRangeVitals() {
-            var checker = new VitalsChecker(new TestAlerter());
+            var checker = new VitalsChecker(new VitalSignAlerterTests());
 
             // Test high temperature
             var highTemp = new VitalReading(105.0f, 72, 95);
@@ -86,7 +87,7 @@ namespace HealthMonitor.Tests {
         /// Tests patient-specific range adjustments based on age and conditions.
         /// </summary>
         static void TestPatientSpecificRanges() {
-            var checker = new VitalsChecker(new TestAlerter());
+            var checker = new VitalsChecker(new VitalSignAlerterTests());
 
             // Test elderly patient with slightly lower temperature
             var elderlyPatient = new PatientProfile { Age = 70 };
@@ -111,7 +112,7 @@ namespace HealthMonitor.Tests {
         /// Tests that the alerter is properly triggered for out-of-range values.
         /// </summary>
         static void TestAlerterBehavior() {
-            var testAlerter = new TestAlerter();
+            var testAlerter = new VitalSignAlerterTests();
             var checker = new VitalsChecker(testAlerter);
 
             var outOfRangeVitals = new VitalReading(104.0f, 110, 85);
@@ -125,7 +126,7 @@ namespace HealthMonitor.Tests {
         /// Tests proper handling of null inputs and edge cases.
         /// </summary>
         static void TestNullInputHandling() {
-            var checker = new VitalsChecker(new TestAlerter());
+            var checker = new VitalsChecker(new VitalSignAlerterTests());
 
             // Test null vitals
             Debug.Assert(!checker.AreAllVitalsWithinRange(null),

@@ -1,4 +1,5 @@
 ﻿using System;
+
 using HealthMonitor.Core;
 using HealthMonitor.Infrastructure;
 using HealthMonitor.Models;
@@ -9,7 +10,7 @@ namespace HealthMonitor {
     /// Demonstrates vital sign checking with various scenarios.
     /// Maintains backward compatibility with original interface.
     /// </summary>
-    public static class Checker {
+    public static class Program {
         /// <summary>
         /// Application entry point - demonstrates the health monitoring system.
         /// Runs tests first, then demonstrates normal and abnormal vital scenarios.
@@ -30,7 +31,7 @@ namespace HealthMonitor {
             Console.WriteLine();
 
             // Initialize system components
-            var alerter = new VitalsAlerter();
+            var alerter = new VitalSignAlerter();
             var checker = new VitalsChecker(alerter);
 
             // Demonstrate normal vitals

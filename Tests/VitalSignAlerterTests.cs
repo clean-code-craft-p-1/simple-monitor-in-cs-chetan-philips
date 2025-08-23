@@ -5,7 +5,7 @@ namespace HealthMonitor.Tests {
     /// Test implementation of IVitalSignAlerter that captures alerts for testing.
     /// Does not perform actual I/O operations during unit tests.
     /// </summary>
-    public class TestAlerter : IVitalSignAlerter {
+    public class VitalSignAlerterTests : IVitalSignAlerter {
         /// <summary>
         /// Gets the number of alerts that have been triggered.
         /// </summary>
