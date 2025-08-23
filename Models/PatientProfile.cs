@@ -1,7 +1,7 @@
 namespace HealthMonitor.Models {
     /// <summary>
-    /// Represents patient-specific information for personalized vital sign checking.
-    /// Contains demographic and medical information that affects normal ranges.
+    /// Represents a patient profile with demographic and medical information.
+    /// Used for personalized vital sign range adjustments.
     /// </summary>
     public class PatientProfile {
         /// <summary>
@@ -11,13 +11,13 @@ namespace HealthMonitor.Models {
         public int? Age { get; set; }
 
         /// <summary>
-        /// Gets or sets the patient's full name.
+        /// Gets or sets the patient's name.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets any relevant medical conditions.
-        /// May affect normal vital sign ranges.
+        /// Gets or sets the patient's medical conditions.
+        /// Used for condition-specific vital sign adjustments.
         /// </summary>
         public string MedicalConditions { get; set; }
     }

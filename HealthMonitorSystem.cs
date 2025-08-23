@@ -56,26 +56,23 @@ namespace HealthMonitor {
         }
 
         private static void DemonstrateNormalVitals(VitalsChecker checker) {
-            // Demonstrate normal vitals
             Console.WriteLine("Testing Normal Vitals...");
-            var normalVitals = new VitalReading(98.6f, 72, 95);
+            var normalVitals = new VitalReading(98.6f, 72, 95, 120f, 80f);
 
             checker.CheckVitals(normalVitals);
             CheckAndReportVitalStatus(checker, normalVitals);
         }
 
         private static void DemonstrateAbnormalVitals(VitalsChecker checker) {
-            // Demonstrate abnormal vitals
             Console.WriteLine("Testing Abnormal Vitals...");
-            var abnormalVitals = new VitalReading(104.0f, 110, 85);
+            var abnormalVitals = new VitalReading(104.0f, 110, 85, 160f, 100f);
             checker.CheckVitals(abnormalVitals);
         }
 
         private static void DemonstratePatientSpecificChecking(VitalsChecker checker) {
-            // Demonstrate patient-specific checking
             Console.WriteLine("Testing with Patient Profile...");
             var elderlyPatient = CreateElderlyPatient();
-            var elderlyVitals = new VitalReading(94.5f, 75, 92);
+            var elderlyVitals = new VitalReading(94.5f, 75, 92, 145f, 92f);
 
             Console.WriteLine($"Checking vitals for {elderlyPatient.Name} (Age: {elderlyPatient.Age})");
             checker.CheckVitals(elderlyVitals, elderlyPatient);

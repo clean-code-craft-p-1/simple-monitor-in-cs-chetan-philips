@@ -43,12 +43,10 @@ namespace HealthMonitor.VitalSigns {
         }
 
         private (float min, float max) GetAgeSpecificTemperatureRange(int age) {
-            // Children may have slightly higher normal temperatures
             if (AgeClassifier.IsChild(age)) {
                 return GetChildTemperatureRange();
             }
 
-            // Elderly patients (65+) may have slightly lower normal temperatures
             if (AgeClassifier.IsElderly(age)) {
                 return GetElderlyTemperatureRange();
             }

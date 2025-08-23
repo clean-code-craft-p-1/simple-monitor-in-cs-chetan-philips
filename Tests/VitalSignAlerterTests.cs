@@ -2,8 +2,8 @@ using HealthMonitor.Infrastructure;
 
 namespace HealthMonitor.Tests {
     /// <summary>
-    /// Test implementation of IVitalSignAlerter that captures alerts for testing.
-    /// Does not perform actual I/O operations during unit tests.
+    /// Test implementation of IVitalSignAlerter for testing purposes.
+    /// Tracks alert calls instead of outputting to console.
     /// </summary>
     public class VitalSignAlerterTests : IVitalSignAlerter {
         /// <summary>
@@ -12,9 +12,19 @@ namespace HealthMonitor.Tests {
         public int AlertCount { get; private set; }
 
         /// <summary>
-        /// Gets the last alert message that was triggered.
+        /// Gets the last vital sign name that triggered an alert.
         /// </summary>
-        public string LastAlertMessage { get; private set; }
+        public string LastVitalName { get; private set; }
+
+        /// <summary>
+        /// Gets the last value that triggered an alert.
+        /// </summary>
+        public string LastValue { get; private set; }
+
+        /// <summary>
+        /// Gets the last unit of measurement that triggered an alert.
+        /// </summary>
+        public string LastUnit { get; private set; }
 
         /// <summary>
         /// Captures alert information for testing without performing I/O.
@@ -22,9 +32,11 @@ namespace HealthMonitor.Tests {
         /// <param name="vitalName">Name of the vital sign that triggered the alert</param>
         /// <param name="value">The out-of-range value</param>
         /// <param name="unit">Unit of measurement</param>
-        public void Alert(string vitalName, float value, string unit) {
+        public void Alert(string vitalName, string value, string unit) {
             AlertCount++;
-            LastAlertMessage = $"{vitalName} is {value} {unit}";
+            LastVitalName = vitalName;
+            LastValue = value;
+            LastUnit = unit;
         }
 
         /// <summary>
@@ -32,7 +44,9 @@ namespace HealthMonitor.Tests {
         /// </summary>
         public void Reset() {
             AlertCount = 0;
-            LastAlertMessage = null;
+            LastVitalName = null;
+            LastValue = null;
+            LastUnit = null;
         }
     }
 }

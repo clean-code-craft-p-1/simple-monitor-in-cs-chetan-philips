@@ -45,12 +45,10 @@ namespace HealthMonitor.VitalSigns {
         }
 
         private (float min, float max) GetAgeSpecificPulseRange(int age) {
-            // Children typically have higher normal pulse rates
             if (AgeClassifier.IsChild(age)) {
                 return GetChildPulseRange();
             }
 
-            // Elderly may have slightly different ranges
             if (AgeClassifier.IsElderly(age)) {
                 return GetElderlyPulseRange();
             }
