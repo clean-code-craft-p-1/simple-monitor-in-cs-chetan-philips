@@ -1,43 +1,70 @@
-using System;
-
+﻿using System;
 using HealthMonitor.Core;
 using HealthMonitor.Infrastructure;
 using HealthMonitor.Models;
 
 namespace HealthMonitor {
     /// <summary>
-    /// Main class for checking vitals, maintains backward compatibility with original interface
+    /// Main entry point for the Health Monitor System.
+    /// Demonstrates vital sign checking with various scenarios.
+    /// Maintains backward compatibility with original interface.
     /// </summary>
     public static class Checker {
         /// <summary>
-        /// Checks vital signs and alerts if any are out of range.
+        /// Application entry point - demonstrates the health monitoring system.
+        /// Runs tests first, then demonstrates normal and abnormal vital scenarios.
         /// </summary>
         public static void Main() {
             Console.WriteLine("Health Monitor System Starting...");
-
-            // Run tests first
-            Console.WriteLine("Running tests...");
-            HealthMonitor.Tests.CheckerTests.RunAllTests();
             Console.WriteLine();
 
+            // Run comprehensive tests first
+            Console.WriteLine("Running system tests...");
+            try {
+                Tests.CheckerTests.RunAllTests();
+                Console.WriteLine("All tests passed!");
+            } catch (Exception ex) {
+                Console.WriteLine($"Tests failed: {ex.Message}");
+                return;
+            }
+            Console.WriteLine();
+
+            // Initialize system components
             var alerter = new VitalsAlerter();
             var checker = new VitalsChecker(alerter);
 
-            // Test with normal vitals
+            // Demonstrate normal vitals
+            Console.WriteLine("Testing Normal Vitals...");
             var normalVitals = new VitalReading(98.6f, 72, 95);
-            Console.WriteLine("Checking normal vitals...");
             checker.CheckVitals(normalVitals);
+            if (checker.AreAllVitalsWithinRange(normalVitals)) {
+                Console.WriteLine("All vitals are within normal range");
+            }
+            Console.WriteLine();
 
-            // Test with abnormal vitals
+            // Demonstrate abnormal vitals
+            Console.WriteLine("Testing Abnormal Vitals...");
             var abnormalVitals = new VitalReading(104.0f, 110, 85);
-            Console.WriteLine("Checking abnormal vitals...");
             checker.CheckVitals(abnormalVitals);
+            Console.WriteLine();
 
-            // Test with patient profile
-            var patientProfile = new PatientProfile { Age = 25, Name = "John Doe" };
-            Console.WriteLine("Checking vitals with patient profile...");
-            checker.CheckVitals(normalVitals, patientProfile);
+            // Demonstrate patient-specific checking
+            Console.WriteLine("Testing with Patient Profile...");
+            var elderlyPatient = new PatientProfile {
+                Age = 70,
+                Name = "John Smith",
+                MedicalConditions = "Hypertension"
+            };
 
+            var elderlyVitals = new VitalReading(94.5f, 75, 92);
+            Console.WriteLine($"Checking vitals for {elderlyPatient.Name} (Age: {elderlyPatient.Age})");
+            checker.CheckVitals(elderlyVitals, elderlyPatient);
+
+            if (checker.AreAllVitalsWithinRange(elderlyVitals, elderlyPatient)) {
+                Console.WriteLine("All vitals are within normal range for this patient profile");
+            }
+
+            Console.WriteLine();
             Console.WriteLine("Health Monitor System Complete.");
         }
     }
