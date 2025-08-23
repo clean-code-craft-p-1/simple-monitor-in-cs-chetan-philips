@@ -1,7 +1,6 @@
 namespace HealthMonitor.Models {
     /// <summary>
-    /// Represents a patient profile with demographic and medical information.
-    /// Used for personalized vital sign range adjustments.
+    /// Patient profile with demographic and medical information.
     /// </summary>
     public class PatientProfile {
         /// <summary>

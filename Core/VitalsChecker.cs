@@ -3,22 +3,22 @@ using HealthMonitor.Models;
 
 namespace HealthMonitor.Core {
     /// <summary>
-    /// Simple, extensible vital signs checker.
-    /// Automatically discovers and checks all available vital signs.
+    /// Extensible vital signs checker with runtime registration.
     /// </summary>
     public class VitalsChecker {
         private readonly IVitalSignAlerter _alerter;
-        private readonly Dictionary<string, IVitalSign> _vitalCheckers;
+        private readonly Dictionary<string, IVitalSign> _vitalSigns = new();
 
         public VitalsChecker(IVitalSignAlerter alerter) {
             _alerter = alerter;
-            _vitalCheckers = CreateStandardVitalCheckers();
+            RegisterDefaultVitalSigns();
         }
 
         public void CheckVitals(VitalReading vitals, PatientProfile profile = null) {
             foreach (var vitalName in vitals.GetVitalNames()) {
-                CheckSingleVital(vitalName, vitals.GetReading(vitalName), profile);
+                CheckVital(vitalName, vitals.GetReading(vitalName), profile);
             }
+            CheckBloodPressureIfAvailable(vitals, profile);
         }
 
         public bool AreAllVitalsWithinRange(VitalReading vitals, PatientProfile profile = null) {
@@ -27,43 +27,60 @@ namespace HealthMonitor.Core {
                     return false;
                 }
             }
-            return true;
+            return CheckBloodPressureRange(vitals, profile);
         }
 
-        // Easy way to add new vital signs at runtime
         public void RegisterVitalSign(IVitalSign vitalSign) {
-            _vitalCheckers[vitalSign.Name] = vitalSign;
+            _vitalSigns[vitalSign.Name] = vitalSign;
         }
 
-        private void CheckSingleVital(string vitalName, float value, PatientProfile profile) {
-            if (!IsVitalWithinRange(vitalName, value, profile)) {
-                var unit = _vitalCheckers.TryGetValue(vitalName, out var checker) ? checker.Unit : "";
-                _alerter.Alert(vitalName, value.ToString("F1"), unit);
+        private void CheckVital(string vitalName, float value, PatientProfile profile) {
+            if (_vitalSigns.TryGetValue(vitalName, out var vitalSign)) {
+                if (!vitalSign.IsWithinRange(value, profile)) {
+                    _alerter.Alert(vitalName, value.ToString("F1"), vitalSign.Unit);
+                }
             }
         }
 
         private bool IsVitalWithinRange(string vitalName, float value, PatientProfile profile) {
-            return _vitalCheckers.TryGetValue(vitalName, out var checker) &&
-                   checker.IsWithinRange(value, profile);
+            return !_vitalSigns.TryGetValue(vitalName, out var vitalSign) || 
+                   vitalSign.IsWithinRange(value, profile);
         }
 
-        private static Dictionary<string, IVitalSign> CreateStandardVitalCheckers() {
-            var checkers = new Dictionary<string, IVitalSign>();
-
-            // Register standard vital signs
-            var standardVitals = new IVitalSign[] {
-                new VitalSigns.Temperature(),
-                new VitalSigns.PulseRate(),
-                new VitalSigns.OxygenSaturation(),
-                new VitalSigns.SystolicBloodPressure(),
-                new VitalSigns.DiastolicBloodPressure()
-            };
-
-            foreach (var vital in standardVitals) {
-                checkers[vital.Name] = vital;
+        private void CheckBloodPressureIfAvailable(VitalReading vitals, PatientProfile profile) {
+            if (vitals.HasReading("Systolic Blood Pressure") && 
+                vitals.HasReading("Diastolic Blood Pressure")) {
+                CheckBloodPressure(vitals.SystolicBloodPressure, vitals.DiastolicBloodPressure, profile);
             }
+        }
 
-            return checkers;
+        private bool CheckBloodPressureRange(VitalReading vitals, PatientProfile profile) {
+            if (!vitals.HasReading("Systolic Blood Pressure") || 
+                !vitals.HasReading("Diastolic Blood Pressure")) {
+                return true;
+            }
+            
+            if (_vitalSigns.TryGetValue("Blood Pressure", out var bp) && 
+                bp is VitalSigns.BloodPressure bloodPressure) {
+                return bloodPressure.IsWithinRange(vitals.SystolicBloodPressure, vitals.DiastolicBloodPressure, profile);
+            }
+            return true;
+        }
+
+        private void CheckBloodPressure(float systolic, float diastolic, PatientProfile profile) {
+            if (_vitalSigns.TryGetValue("Blood Pressure", out var bp) && 
+                bp is VitalSigns.BloodPressure bloodPressure) {
+                if (!bloodPressure.IsWithinRange(systolic, diastolic, profile)) {
+                    _alerter.Alert("Blood Pressure", $"{systolic:F0}/{diastolic:F0}", bp.Unit);
+                }
+            }
+        }
+
+        private void RegisterDefaultVitalSigns() {
+            RegisterVitalSign(new VitalSigns.Temperature());
+            RegisterVitalSign(new VitalSigns.PulseRate());
+            RegisterVitalSign(new VitalSigns.OxygenSaturation());
+            RegisterVitalSign(new VitalSigns.BloodPressure());
         }
     }
 }

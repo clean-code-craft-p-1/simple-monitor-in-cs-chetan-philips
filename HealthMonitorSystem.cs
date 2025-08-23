@@ -26,24 +26,21 @@ namespace HealthMonitor {
         private static void DemonstrateSystem() {
             var checker = new VitalsChecker(new VitalSignAlerter());
 
-            // Normal vitals
             Console.WriteLine("\nTesting Normal Vitals:");
-            var normalVitals = new VitalReading(98.6f, 72, 95, 120f, 80f);
+            var normalVitals = new VitalReading(98.6f, 72f, 95f, 120f, 80f);
             checker.CheckVitals(normalVitals);
+            Console.WriteLine("Normal vitals checked - no alerts expected");
 
-            // Abnormal vitals
             Console.WriteLine("\nTesting Abnormal Vitals:");
-            var abnormalVitals = new VitalReading(104f, 110, 85, 160f, 100f);
+            var abnormalVitals = new VitalReading(104f, 110f, 85f, 160f, 100f);
             checker.CheckVitals(abnormalVitals);
 
-            // Add new vital sign at runtime (demonstrates extensibility)
-            Console.WriteLine("\nAdding Respiratory Rate:");
-            checker.RegisterVitalSign(new RespiratoryRate());
+            Console.WriteLine("\nDemonstrating Runtime Extensibility:");
+            checker.RegisterVitalSign(new Tests.RespiratoryRate());
 
-            var vitalsWithRespiration = new VitalReading();
-            vitalsWithRespiration.SetReading("Temperature", 98.6f);
-            vitalsWithRespiration.SetReading("Respiratory Rate", 25f); // High
-            checker.CheckVitals(vitalsWithRespiration);
+            var extendedVitals = new VitalReading();
+            extendedVitals.SetReading("Respiratory Rate", 25f); // High
+            checker.CheckVitals(extendedVitals);
         }
     }
 

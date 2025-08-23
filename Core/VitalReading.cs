@@ -2,34 +2,49 @@ using System.Collections.Generic;
 
 namespace HealthMonitor.Core {
     /// <summary>
-    /// Represents vital sign readings using a flexible dictionary approach.
-    /// Easily extensible for new vital signs without code changes.
+    /// Represents vital sign readings with extensible support.
     /// </summary>
     public class VitalReading {
-        private readonly Dictionary<string, float> _readings = new Dictionary<string, float>();
+        private readonly Dictionary<string, float> _readings = new();
 
         public VitalReading() { }
 
-        // Convenient constructor for common vitals
-        public VitalReading(float temperature, int pulseRate, float oxygenSaturation) {
+        public VitalReading(float temperature, float pulseRate, float oxygenSaturation) {
             SetReading("Temperature", temperature);
             SetReading("Pulse Rate", pulseRate);
             SetReading("Oxygen Saturation", oxygenSaturation);
         }
 
-        // Constructor with blood pressure
-        public VitalReading(float temperature, int pulseRate, float oxygenSaturation,
-                          float systolic, float diastolic) : this(temperature, pulseRate, oxygenSaturation) {
-            SetReading("Systolic Blood Pressure", systolic);
-            SetReading("Diastolic Blood Pressure", diastolic);
+        public VitalReading(float temperature, float pulseRate, float oxygenSaturation, 
+                          float systolicBP, float diastolicBP) {
+            SetReading("Temperature", temperature);
+            SetReading("Pulse Rate", pulseRate);
+            SetReading("Oxygen Saturation", oxygenSaturation);
+            SetReading("Systolic Blood Pressure", systolicBP);
+            SetReading("Diastolic Blood Pressure", diastolicBP);
         }
 
-        public void SetReading(string vitalName, float value) => _readings[vitalName] = value;
+        public void SetReading(string vitalName, float value) {
+            if (value > 0) _readings[vitalName] = value;
+        }
 
-        public float GetReading(string vitalName) => _readings.TryGetValue(vitalName, out var value) ? value : 0f;
+        public float GetReading(string vitalName) {
+            return _readings.TryGetValue(vitalName, out float value) ? value : 0f;
+        }
 
-        public bool HasReading(string vitalName) => _readings.ContainsKey(vitalName);
+        public bool HasReading(string vitalName) {
+            return _readings.ContainsKey(vitalName);
+        }
 
-        public IEnumerable<string> GetVitalNames() => _readings.Keys;
+        public IEnumerable<string> GetVitalNames() {
+            return _readings.Keys;
+        }
+
+        // Legacy properties
+        public float Temperature => GetReading("Temperature");
+        public float PulseRate => GetReading("Pulse Rate");
+        public float OxygenSaturation => GetReading("Oxygen Saturation");
+        public float SystolicBloodPressure => GetReading("Systolic Blood Pressure");
+        public float DiastolicBloodPressure => GetReading("Diastolic Blood Pressure");
     }
 }
