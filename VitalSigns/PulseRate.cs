@@ -13,8 +13,6 @@ namespace HealthMonitor.VitalSigns {
         private const float CHILD_MAX_PULSE = 120.0f;
         private const float ELDERLY_MIN_PULSE = 55.0f;
         private const float ELDERLY_MAX_PULSE = 105.0f;
-        private const int CHILD_AGE_THRESHOLD = 12;
-        private const int ELDERLY_AGE_THRESHOLD = 65;
 
         /// <summary>
         /// Gets the name of this vital sign.
@@ -40,23 +38,36 @@ namespace HealthMonitor.VitalSigns {
 
         private (float min, float max) GetPulseRateRange(PatientProfile profile) {
             if (profile?.Age == null) {
-                return (ADULT_MIN_PULSE, ADULT_MAX_PULSE);
+                return GetAdultPulseRange();
             }
 
+            return GetAgeSpecificPulseRange(profile.Age.Value);
+        }
+
+        private (float min, float max) GetAgeSpecificPulseRange(int age) {
             // Children typically have higher normal pulse rates
-            if (IsChild(profile.Age.Value)) {
-                return (CHILD_MIN_PULSE, CHILD_MAX_PULSE);
+            if (AgeClassifier.IsChild(age)) {
+                return GetChildPulseRange();
             }
 
             // Elderly may have slightly different ranges
-            if (IsElderly(profile.Age.Value)) {
-                return (ELDERLY_MIN_PULSE, ELDERLY_MAX_PULSE);
+            if (AgeClassifier.IsElderly(age)) {
+                return GetElderlyPulseRange();
             }
 
+            return GetAdultPulseRange();
+        }
+
+        private static (float min, float max) GetAdultPulseRange() {
             return (ADULT_MIN_PULSE, ADULT_MAX_PULSE);
         }
 
-        private static bool IsChild(int age) => age < CHILD_AGE_THRESHOLD;
-        private static bool IsElderly(int age) => age >= ELDERLY_AGE_THRESHOLD;
+        private static (float min, float max) GetChildPulseRange() {
+            return (CHILD_MIN_PULSE, CHILD_MAX_PULSE);
+        }
+
+        private static (float min, float max) GetElderlyPulseRange() {
+            return (ELDERLY_MIN_PULSE, ELDERLY_MAX_PULSE);
+        }
     }
 }

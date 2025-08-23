@@ -11,8 +11,6 @@ namespace HealthMonitor.VitalSigns {
         private const float BASE_MAX_TEMP = 102.0f;
         private const float CHILD_TEMP_ADJUSTMENT = 1.0f;
         private const float ELDERLY_TEMP_ADJUSTMENT = -1.0f;
-        private const int CHILD_AGE_THRESHOLD = 12;
-        private const int ELDERLY_AGE_THRESHOLD = 65;
 
         /// <summary>
         /// Gets the name of this vital sign.
@@ -38,23 +36,36 @@ namespace HealthMonitor.VitalSigns {
 
         private (float min, float max) GetTemperatureRange(PatientProfile profile) {
             if (profile?.Age == null) {
-                return (BASE_MIN_TEMP, BASE_MAX_TEMP);
+                return GetAdultTemperatureRange();
             }
 
+            return GetAgeSpecificTemperatureRange(profile.Age.Value);
+        }
+
+        private (float min, float max) GetAgeSpecificTemperatureRange(int age) {
             // Children may have slightly higher normal temperatures
-            if (IsChild(profile.Age.Value)) {
-                return (BASE_MIN_TEMP, BASE_MAX_TEMP + CHILD_TEMP_ADJUSTMENT);
+            if (AgeClassifier.IsChild(age)) {
+                return GetChildTemperatureRange();
             }
 
             // Elderly patients (65+) may have slightly lower normal temperatures
-            if (IsElderly(profile.Age.Value)) {
-                return (BASE_MIN_TEMP + ELDERLY_TEMP_ADJUSTMENT, BASE_MAX_TEMP);
+            if (AgeClassifier.IsElderly(age)) {
+                return GetElderlyTemperatureRange();
             }
 
+            return GetAdultTemperatureRange();
+        }
+
+        private static (float min, float max) GetAdultTemperatureRange() {
             return (BASE_MIN_TEMP, BASE_MAX_TEMP);
         }
 
-        private static bool IsChild(int age) => age < CHILD_AGE_THRESHOLD;
-        private static bool IsElderly(int age) => age >= ELDERLY_AGE_THRESHOLD;
+        private static (float min, float max) GetChildTemperatureRange() {
+            return (BASE_MIN_TEMP, BASE_MAX_TEMP + CHILD_TEMP_ADJUSTMENT);
+        }
+
+        private static (float min, float max) GetElderlyTemperatureRange() {
+            return (BASE_MIN_TEMP + ELDERLY_TEMP_ADJUSTMENT, BASE_MAX_TEMP);
+        }
     }
 }
