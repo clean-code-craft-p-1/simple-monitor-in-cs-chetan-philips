@@ -17,56 +17,86 @@ namespace HealthMonitor {
         /// </summary>
         public static void Main() {
             Console.WriteLine("Health Monitor System Starting...");
-            Console.WriteLine();
 
+            if (!RunSystemTests()) {
+                return;
+            }
+
+            DemonstrateVitalSignScenarios();
+
+            Console.WriteLine("Health Monitor System Complete.");
+        }
+
+        private static bool RunSystemTests() {
             // Run comprehensive tests first
             Console.WriteLine("Running system tests...");
             try {
                 Tests.CheckerTests.RunAllTests();
                 Console.WriteLine("All tests passed!");
+                return true;
             } catch (Exception ex) {
                 Console.WriteLine($"Tests failed: {ex.Message}");
-                return;
+                return false;
             }
-            Console.WriteLine();
+        }
 
+        private static void DemonstrateVitalSignScenarios() {
             // Initialize system components
-            var alerter = new VitalSignAlerter();
-            var checker = new VitalsChecker(alerter);
+            var checker = CreateVitalsChecker();
 
+            // Demonstrate normal and abnormal scenarios
+            DemonstrateNormalVitals(checker);
+            DemonstrateAbnormalVitals(checker);
+            DemonstratePatientSpecificChecking(checker);
+        }
+
+        private static VitalsChecker CreateVitalsChecker() {
+            var alerter = new VitalSignAlerter();
+            return new VitalsChecker(alerter);
+        }
+
+        private static void DemonstrateNormalVitals(VitalsChecker checker) {
             // Demonstrate normal vitals
             Console.WriteLine("Testing Normal Vitals...");
             var normalVitals = new VitalReading(98.6f, 72, 95);
-            checker.CheckVitals(normalVitals);
-            if (checker.AreAllVitalsWithinRange(normalVitals)) {
-                Console.WriteLine("All vitals are within normal range");
-            }
-            Console.WriteLine();
 
+            checker.CheckVitals(normalVitals);
+            CheckAndReportVitalStatus(checker, normalVitals);
+        }
+
+        private static void DemonstrateAbnormalVitals(VitalsChecker checker) {
             // Demonstrate abnormal vitals
             Console.WriteLine("Testing Abnormal Vitals...");
             var abnormalVitals = new VitalReading(104.0f, 110, 85);
             checker.CheckVitals(abnormalVitals);
-            Console.WriteLine();
+        }
 
+        private static void DemonstratePatientSpecificChecking(VitalsChecker checker) {
             // Demonstrate patient-specific checking
             Console.WriteLine("Testing with Patient Profile...");
-            var elderlyPatient = new PatientProfile {
+            var elderlyPatient = CreateElderlyPatient();
+            var elderlyVitals = new VitalReading(94.5f, 75, 92);
+
+            Console.WriteLine($"Checking vitals for {elderlyPatient.Name} (Age: {elderlyPatient.Age})");
+            checker.CheckVitals(elderlyVitals, elderlyPatient);
+            CheckAndReportVitalStatus(checker, elderlyVitals, elderlyPatient);
+        }
+
+        private static PatientProfile CreateElderlyPatient() {
+            return new PatientProfile {
                 Age = 70,
                 Name = "John Smith",
                 MedicalConditions = "Hypertension"
             };
+        }
 
-            var elderlyVitals = new VitalReading(94.5f, 75, 92);
-            Console.WriteLine($"Checking vitals for {elderlyPatient.Name} (Age: {elderlyPatient.Age})");
-            checker.CheckVitals(elderlyVitals, elderlyPatient);
-
-            if (checker.AreAllVitalsWithinRange(elderlyVitals, elderlyPatient)) {
-                Console.WriteLine("All vitals are within normal range for this patient profile");
+        private static void CheckAndReportVitalStatus(VitalsChecker checker, VitalReading vitals, PatientProfile profile = null) {
+            if (checker.AreAllVitalsWithinRange(vitals, profile)) {
+                var message = profile != null
+                    ? "All vitals are within normal range for this patient profile"
+                    : "All vitals are within normal range";
+                Console.WriteLine(message);
             }
-
-            Console.WriteLine();
-            Console.WriteLine("Health Monitor System Complete.");
         }
     }
 }

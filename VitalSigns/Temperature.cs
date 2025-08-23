@@ -7,6 +7,13 @@ namespace HealthMonitor.VitalSigns {
     /// Supports age-based range adjustments for different patient profiles.
     /// </summary>
     public class Temperature : IVitalSign {
+        private const float BASE_MIN_TEMP = 95.0f;
+        private const float BASE_MAX_TEMP = 102.0f;
+        private const float CHILD_TEMP_ADJUSTMENT = 1.0f;
+        private const float ELDERLY_TEMP_ADJUSTMENT = -1.0f;
+        private const int CHILD_AGE_THRESHOLD = 12;
+        private const int ELDERLY_AGE_THRESHOLD = 65;
+
         /// <summary>
         /// Gets the name of this vital sign.
         /// </summary>
@@ -25,21 +32,29 @@ namespace HealthMonitor.VitalSigns {
         /// <param name="profile">Patient profile for age-based adjustments</param>
         /// <returns>True if temperature is within normal range</returns>
         public bool IsWithinRange(float value, PatientProfile profile = null) {
-            const float baseMinTemp = 95.0f;
-            const float baseMaxTemp = 102.0f;
+            var (minTemp, maxTemp) = GetTemperatureRange(profile);
+            return value >= minTemp && value <= maxTemp;
+        }
 
-            if (profile?.Age != null) {
-                // Elderly patients (65+) may have slightly lower normal temperatures
-                if (profile.Age >= 65) {
-                    return value >= (baseMinTemp - 1.0f) && value <= baseMaxTemp;
-                }
-                // Children may have slightly higher normal temperatures
-                if (profile.Age < 12) {
-                    return value >= baseMinTemp && value <= (baseMaxTemp + 1.0f);
-                }
+        private (float min, float max) GetTemperatureRange(PatientProfile profile) {
+            if (profile?.Age == null) {
+                return (BASE_MIN_TEMP, BASE_MAX_TEMP);
             }
 
-            return value >= baseMinTemp && value <= baseMaxTemp;
+            // Children may have slightly higher normal temperatures
+            if (IsChild(profile.Age.Value)) {
+                return (BASE_MIN_TEMP, BASE_MAX_TEMP + CHILD_TEMP_ADJUSTMENT);
+            }
+
+            // Elderly patients (65+) may have slightly lower normal temperatures
+            if (IsElderly(profile.Age.Value)) {
+                return (BASE_MIN_TEMP + ELDERLY_TEMP_ADJUSTMENT, BASE_MAX_TEMP);
+            }
+
+            return (BASE_MIN_TEMP, BASE_MAX_TEMP);
         }
+
+        private static bool IsChild(int age) => age < CHILD_AGE_THRESHOLD;
+        private static bool IsElderly(int age) => age >= ELDERLY_AGE_THRESHOLD;
     }
 }

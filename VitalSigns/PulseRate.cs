@@ -7,6 +7,15 @@ namespace HealthMonitor.VitalSigns {
     /// Supports age-based range adjustments for different patient profiles.
     /// </summary>
     public class PulseRate : IVitalSign {
+        private const float ADULT_MIN_PULSE = 60.0f;
+        private const float ADULT_MAX_PULSE = 100.0f;
+        private const float CHILD_MIN_PULSE = 70.0f;
+        private const float CHILD_MAX_PULSE = 120.0f;
+        private const float ELDERLY_MIN_PULSE = 55.0f;
+        private const float ELDERLY_MAX_PULSE = 105.0f;
+        private const int CHILD_AGE_THRESHOLD = 12;
+        private const int ELDERLY_AGE_THRESHOLD = 65;
+
         /// <summary>
         /// Gets the name of this vital sign.
         /// </summary>
@@ -25,21 +34,29 @@ namespace HealthMonitor.VitalSigns {
         /// <param name="profile">Patient profile for age-based adjustments</param>
         /// <returns>True if pulse rate is within normal range</returns>
         public bool IsWithinRange(float value, PatientProfile profile = null) {
-            const float baseMinPulse = 60.0f;
-            const float baseMaxPulse = 100.0f;
+            var (minPulse, maxPulse) = GetPulseRateRange(profile);
+            return value >= minPulse && value <= maxPulse;
+        }
 
-            if (profile?.Age != null) {
-                // Children typically have higher normal pulse rates
-                if (profile.Age < 12) {
-                    return value >= 70.0f && value <= 120.0f;
-                }
-                // Elderly may have slightly different ranges
-                if (profile.Age >= 65) {
-                    return value >= 55.0f && value <= 105.0f;
-                }
+        private (float min, float max) GetPulseRateRange(PatientProfile profile) {
+            if (profile?.Age == null) {
+                return (ADULT_MIN_PULSE, ADULT_MAX_PULSE);
             }
 
-            return value >= baseMinPulse && value <= baseMaxPulse;
+            // Children typically have higher normal pulse rates
+            if (IsChild(profile.Age.Value)) {
+                return (CHILD_MIN_PULSE, CHILD_MAX_PULSE);
+            }
+
+            // Elderly may have slightly different ranges
+            if (IsElderly(profile.Age.Value)) {
+                return (ELDERLY_MIN_PULSE, ELDERLY_MAX_PULSE);
+            }
+
+            return (ADULT_MIN_PULSE, ADULT_MAX_PULSE);
         }
+
+        private static bool IsChild(int age) => age < CHILD_AGE_THRESHOLD;
+        private static bool IsElderly(int age) => age >= ELDERLY_AGE_THRESHOLD;
     }
 }
