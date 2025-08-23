@@ -10,7 +10,7 @@ namespace HealthMonitor {
     /// Demonstrates vital sign checking with various scenarios.
     /// Maintains backward compatibility with original interface.
     /// </summary>
-    public static class Program {
+    public static class HealthMonitorSystem {
         /// <summary>
         /// Application entry point - demonstrates the health monitoring system.
         /// Runs tests first, then demonstrates normal and abnormal vital scenarios.
