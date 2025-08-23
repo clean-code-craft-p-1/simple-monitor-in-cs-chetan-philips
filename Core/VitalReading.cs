@@ -1,26 +1,31 @@
 namespace HealthMonitor.Core {
     /// <summary>
-    /// Class that represents a vital reading with its value and corresponding vital sign
+    /// Represents a vital reading with temperature, pulse rate, and oxygen saturation
     /// </summary>
     public class VitalReading {
-        /// <summary>Gets the vital sign associated with this reading</summary>
-        public IVitalSign VitalSign { get; }
-
-        /// <summary>Gets the measured value of the vital sign</summary>
-        /// <summary>Gets the measured value of the vital sign</summary>
-        public float Value { get; }
-
-        /// <summary>Gets whether this reading is within normal range</summary>
-        public bool IsWithinRange => VitalSign.IsWithinRange(Value);
+        /// <summary>
+        /// Gets the temperature in degrees Celsius
+        /// </summary>
+        public float Temperature { get; }
+        /// <summary>
+        /// Gets the pulse rate in beats per minute
+        /// </summary>
+        public int PulseRate { get; }
+        /// <summary>
+        /// Gets the oxygen saturation percentage
+        /// </summary>
+        public float OxygenSaturation { get; }
 
         /// <summary>
-        /// Creates a new vital reading
+        /// Initializes a new instance of the VitalReading class with specified values
         /// </summary>
-        /// <param name="vitalSign">The vital sign type</param>
-        /// <param name="value">The measured value</param>
-        public VitalReading(IVitalSign vitalSign, float value) {
-            VitalSign = vitalSign;
-            Value = value;
+        /// <param name="temperature">Temperature in degrees Celsius</param>
+        /// <param name="pulseRate">Pulse rate in beats per minute</param>
+        /// <param name="oxygenSaturation">Oxygen saturation percentage</param>
+        public VitalReading(float temperature, int pulseRate, float oxygenSaturation) {
+            Temperature = temperature;
+            PulseRate = pulseRate;
+            OxygenSaturation = oxygenSaturation;
         }
     }
 }

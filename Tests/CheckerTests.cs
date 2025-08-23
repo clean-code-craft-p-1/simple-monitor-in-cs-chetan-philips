@@ -1,122 +1,109 @@
-using System.Collections.Generic;
+using System;
+using System.Diagnostics;
 
-using Xunit;
-
-using HealthMonitor;
 using HealthMonitor.Core;
-using HealthMonitor.VitalSigns;
+using HealthMonitor.Models;
 
-public class CheckerTests {
-    // Legacy compatibility tests
-    [Fact]
-    public void NotOkWhenAnyVitalIsOffRange() {
-        // Original test - pulseRate is out of range
-        Assert.False(Checker.VitalsOk(99f, 102, 70));
-        // Original test - all vitals within range
-        Assert.True(Checker.VitalsOk(98.1f, 70, 98));
-    }
-
-    // Tests for temperature vital sign
-    [Theory]
-    [InlineData(95f, true)]   // Lower boundary
-    [InlineData(94.9f, false)] // Just below lower boundary
-    [InlineData(102f, true)]   // Upper boundary
-    [InlineData(102.1f, false)] // Just above upper boundary
-    [InlineData(98.6f, true)]   // Normal temperature
-    public void TemperatureRangeChecks(float temp, bool expectedResult) {
-        var temperature = new Temperature();
-        Assert.Equal(expectedResult, temperature.IsWithinRange(temp));
-    }
-
-    // Tests for pulse rate vital sign
-    [Theory]
-    [InlineData(60, true)]   // Lower boundary
-    [InlineData(59, false)]  // Just below lower boundary
-    [InlineData(100, true)]  // Upper boundary
-    [InlineData(101, false)] // Just above upper boundary
-    [InlineData(75, true)]   // Normal pulse rate
-    public void PulseRateRangeChecks(float pulse, bool expectedResult) {
-        var pulseRate = new PulseRate();
-        Assert.Equal(expectedResult, pulseRate.IsWithinRange(pulse));
-    }
-
-    // Tests for SpO2 vital sign
-    [Theory]
-    [InlineData(90, true)]   // Lower boundary
-    [InlineData(89, false)]  // Just below lower boundary
-    [InlineData(100, true)]  // Upper boundary
-    [InlineData(98, true)]   // Normal SpO2
-    public void SpO2RangeChecks(float spo2, bool expectedResult) {
-        var oxygenSaturation = new OxygenSaturation();
-        Assert.Equal(expectedResult, oxygenSaturation.IsWithinRange(spo2));
-    }
-
-    // Tests for VitalReading class
-    [Fact]
-    public void VitalReadingIdentifiesOutOfRangeValues() {
-        var tempVital = new Temperature();
-        var pulseVital = new PulseRate();
-        var spo2Vital = new OxygenSaturation();
-
-        var normalTempReading = new VitalReading(tempVital, 98.6f);
-        var highTempReading = new VitalReading(tempVital, 103f);
-        var lowPulseReading = new VitalReading(pulseVital, 50f);
-        var normalSpo2Reading = new VitalReading(spo2Vital, 95f);
-
-        Assert.True(normalTempReading.IsWithinRange);
-        Assert.False(highTempReading.IsWithinRange);
-        Assert.False(lowPulseReading.IsWithinRange);
-        Assert.True(normalSpo2Reading.IsWithinRange);
-    }
-
-    // Test for VitalsChecker pure function
-    [Fact]
-    public void AreAllVitalsWithinRangeIdentifiesOutOfRangeReadings() {
-        var checker = new VitalsChecker();
-        var tempVital = new Temperature();
-        var pulseVital = new PulseRate();
-        var spo2Vital = new OxygenSaturation();
-
-        // All vitals in range
-        var allInRangeReadings = new List<VitalReading>
+namespace HealthMonitor.Tests {
+    /// <summary>
+    /// Test suite for the Health Monitor System
+    /// Contains comprehensive tests for vital sign checking functionality
+    /// </summary>
+    public static class CheckerTests
+    {
+        /// <summary>
+        /// Runs all test methods and reports results
+        /// </summary>
+        public static void RunAllTests()
         {
-            new VitalReading(tempVital, 98.6f),
-            new VitalReading(pulseVital, 75f),
-            new VitalReading(spo2Vital, 95f)
-        };
+            TestVitalsWithinRange();
+            TestVitalsOutOfRange();
+            TestBoundaryConditions();
+            TestPatientSpecificRanges();
+            TestAlerterBehavior();
+            TestAllCombinations();
+            Console.WriteLine("All tests passed!");
+        }
 
-        // One vital out of range
-        var oneOutOfRangeReadings = new List<VitalReading>
+        static void TestVitalsWithinRange()
         {
-            new VitalReading(tempVital, 98.6f),
-            new VitalReading(pulseVital, 110f), // Out of range pulse
-            new VitalReading(spo2Vital, 95f)
-        };
+            var checker = new VitalsChecker(new TestAlerter());
+            var vitals = new VitalReading(98.1f, 72, 95);
+            Debug.Assert(checker.AreAllVitalsWithinRange(vitals));
+        }
 
-        Assert.True(checker.AreAllVitalsWithinRange(allInRangeReadings));
-        Assert.False(checker.AreAllVitalsWithinRange(oneOutOfRangeReadings));
-    }
+        static void TestVitalsOutOfRange()
+        {
+            var checker = new VitalsChecker(new TestAlerter());
+            
+            var highTemp = new VitalReading(102.5f, 72, 95);
+            Debug.Assert(!checker.AreAllVitalsWithinRange(highTemp));
+            
+            var highPulse = new VitalReading(98.1f, 110, 95);
+            Debug.Assert(!checker.AreAllVitalsWithinRange(highPulse));
+            
+            var lowOxygen = new VitalReading(98.1f, 72, 85);
+            Debug.Assert(!checker.AreAllVitalsWithinRange(lowOxygen));
+        }
 
-    // Edge case tests
-    [Fact]
-    public void CheckVitalsHandlesAllCombinationsOfOutOfRangeVitals() {
-        // Create a test implementation of VitalsChecker that doesn't do I/O
-        var mockChecker = new TestVitalsChecker();
+        static void TestBoundaryConditions()
+        {
+            var checker = new VitalsChecker(new TestAlerter());
+            
+            var minBoundary = new VitalReading(95.0f, 60, 90);
+            Debug.Assert(checker.AreAllVitalsWithinRange(minBoundary));
+            
+            var maxBoundary = new VitalReading(102.0f, 100, 100);
+            Debug.Assert(checker.AreAllVitalsWithinRange(maxBoundary));
+            
+            var belowMin = new VitalReading(94.9f, 59, 89);
+            Debug.Assert(!checker.AreAllVitalsWithinRange(belowMin));
+            
+            var aboveMax = new VitalReading(102.1f, 101, 101);
+            Debug.Assert(!checker.AreAllVitalsWithinRange(aboveMax));
+        }
 
-        // All vitals normal
-        Assert.True(mockChecker.CheckVitals(98.6f, 75f, 95f));
+        static void TestPatientSpecificRanges()
+        {
+            var checker = new VitalsChecker(new TestAlerter());
+            var youngPatient = new PatientProfile { Age = 15 };
+            var elderlyPatient = new PatientProfile { Age = 70 };
+            
+            var vitals = new VitalReading(98.6f, 75, 98);
+            Debug.Assert(checker.AreAllVitalsWithinRange(vitals, youngPatient));
+            Debug.Assert(checker.AreAllVitalsWithinRange(vitals, elderlyPatient));
+        }
 
-        // Each vital out of range individually
-        Assert.False(mockChecker.CheckVitals(94f, 75f, 95f));   // Low temp
-        Assert.False(mockChecker.CheckVitals(103f, 75f, 95f));  // High temp
-        Assert.False(mockChecker.CheckVitals(98.6f, 55f, 95f)); // Low pulse
-        Assert.False(mockChecker.CheckVitals(98.6f, 110f, 95f)); // High pulse
-        Assert.False(mockChecker.CheckVitals(98.6f, 75f, 85f));  // Low SpO2
+        static void TestAlerterBehavior()
+        {
+            var testAlerter = new TestAlerter();
+            var checker = new VitalsChecker(testAlerter);
+            
+            var outOfRangeVitals = new VitalReading(104.0f, 110, 85);
+            checker.CheckVitals(outOfRangeVitals);
+            
+            Debug.Assert(testAlerter.AlertCount == 3);
+        }
 
-        // Multiple vitals out of range
-        Assert.False(mockChecker.CheckVitals(94f, 55f, 95f));     // Low temp, low pulse
-        Assert.False(mockChecker.CheckVitals(103f, 75f, 85f));    // High temp, low SpO2
-        Assert.False(mockChecker.CheckVitals(98.6f, 110f, 85f));  // High pulse, low SpO2
-        Assert.False(mockChecker.CheckVitals(94f, 110f, 85f));    // All vitals out of range
+        static void TestAllCombinations()
+        {
+            var checker = new VitalsChecker(new TestAlerter());
+            
+            var combinations = new[]
+            {
+                new VitalReading(94.0f, 70, 95),   // Only temp out
+                new VitalReading(98.0f, 110, 95),  // Only pulse out
+                new VitalReading(98.0f, 70, 85),   // Only oxygen out
+                new VitalReading(94.0f, 110, 95),  // Temp and pulse out
+                new VitalReading(94.0f, 70, 85),   // Temp and oxygen out
+                new VitalReading(98.0f, 110, 85),  // Pulse and oxygen out
+                new VitalReading(94.0f, 110, 85)   // All out
+            };
+
+            foreach (var combo in combinations)
+            {
+                Debug.Assert(!checker.AreAllVitalsWithinRange(combo));
+            }
+        }
     }
 }

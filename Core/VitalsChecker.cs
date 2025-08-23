@@ -1,86 +1,80 @@
-using System;
-using System.Collections.Generic;
-
 using HealthMonitor.Infrastructure;
-using HealthMonitor.VitalSigns;
+using HealthMonitor.Models;
 
 namespace HealthMonitor.Core {
     /// <summary>
     /// Class responsible for checking vital signs
     /// </summary>
     public class VitalsChecker {
-        private readonly VitalsAlerter _alerter;
-        private readonly IVitalSign _temperatureVital;
-        private readonly IVitalSign _pulseRateVital;
-        private readonly IVitalSign _spo2Vital;
+        private readonly IVitalSignAlerter _alerter;
 
         /// <summary>
-        /// Default constructor that initializes with standard vital sign checkers
+        /// Constructor that accepts an IVitalSignAlerter implementation
         /// </summary>
-        public VitalsChecker()
-            : this(new VitalsAlerter(), new Temperature(), new PulseRate(), new OxygenSaturation()) {
+        public VitalsChecker(IVitalSignAlerter alerter) {
+            _alerter = alerter ?? new VitalsAlerter();
         }
 
         /// <summary>
-        /// Constructor with dependency injection for better testability
+        /// Checks if all vital signs are within the normal range.
         /// </summary>
-        /// <param name="alerter">The alerter to use for out-of-range notifications</param>
-        /// <param name="temperatureVital">The temperature checker</param>
-        /// <param name="pulseRateVital">The pulse rate checker</param>
-        /// <param name="spo2Vital">The oxygen saturation checker</param>
-        public VitalsChecker(
-            VitalsAlerter alerter,
-            IVitalSign temperatureVital,
-            IVitalSign pulseRateVital,
-            IVitalSign spo2Vital) {
-            _alerter = alerter;
-            _temperatureVital = temperatureVital;
-            _pulseRateVital = pulseRateVital;
-            _spo2Vital = spo2Vital;
+        /// <param name="vitals">Vital readings to check</param>
+        /// <param name="profile">Optional patient profile for personalized ranges</param>
+        /// <returns></returns>
+        public bool AreAllVitalsWithinRange(VitalReading vitals, PatientProfile profile = null) {
+            return IsTemperatureWithinRange(vitals.Temperature, profile) &&
+                   IsPulseRateWithinRange(vitals.PulseRate, profile) &&
+                   IsOxygenSaturationWithinRange(vitals.OxygenSaturation, profile);
         }
 
         /// <summary>
-        /// Main method for checking vitals with I/O operations
+        /// Checks individual vital signs and alerts if any are critical.
         /// </summary>
-        /// <param name="temperature">Temperature in Fahrenheit</param>
-        /// <param name="pulseRate">Pulse rate in beats per minute</param>
-        /// <param name="spo2">Oxygen saturation percentage</param>
-        /// <returns>True if all vitals are within normal range</returns>
-        public virtual bool CheckVitals(float temperature, float pulseRate, float spo2) {
-            var readings = new List<VitalReading>
-            {
-                new VitalReading(_temperatureVital, temperature),
-                new VitalReading(_pulseRateVital, pulseRate),
-                new VitalReading(_spo2Vital, spo2)
-            };
+        /// <param name="vitals">Vital readings to check</param>
+        /// <param name="profile">Optional patient profile for personalized ranges</param>
+        public void CheckVitals(VitalReading vitals, PatientProfile profile = null) {
+            CheckTemperature(vitals.Temperature, profile);
+            CheckPulseRate(vitals.PulseRate, profile);
+            CheckOxygenSaturation(vitals.OxygenSaturation, profile);
+        }
 
-            var allVitalsOk = AreAllVitalsWithinRange(readings);
+        private bool IsTemperatureWithinRange(float temperature, PatientProfile profile) {
+            var tempVital = VitalSignFactory.Create(VitalSignType.Temperature);
+            return profile == null ?
+                tempVital.IsWithinRange(temperature) :
+                tempVital.IsWithinRange(temperature, profile);
+        }
 
-            // Handling the I/O operations separately from the checking logic
-            if (!allVitalsOk) {
-                // Alert for the first out-of-range vital
-                var outOfRangeReading = readings.Find(r => !r.IsWithinRange);
-                _alerter.Alert(outOfRangeReading);
-            } else {
-                Console.WriteLine("Vitals received within normal range");
-                Console.WriteLine($"Temperature: {temperature} Pulse: {pulseRate}, SO2: {spo2}");
+        private bool IsPulseRateWithinRange(int pulseRate, PatientProfile profile) {
+            var pulseVital = VitalSignFactory.Create(VitalSignType.PulseRate);
+            return profile == null ?
+                pulseVital.IsWithinRange(pulseRate) :
+                pulseVital.IsWithinRange(pulseRate, profile);
+        }
+
+        private bool IsOxygenSaturationWithinRange(float oxygenSaturation, PatientProfile profile) {
+            var oxygenVital = VitalSignFactory.Create(VitalSignType.OxygenSaturation);
+            return profile == null ?
+                oxygenVital.IsWithinRange(oxygenSaturation) :
+                oxygenVital.IsWithinRange(oxygenSaturation, profile);
+        }
+
+        private void CheckTemperature(float temperature, PatientProfile profile) {
+            if (!IsTemperatureWithinRange(temperature, profile)) {
+                _alerter.Alert("Temperature critical!");
             }
-
-            return allVitalsOk;
         }
 
-        /// <summary>
-        /// Pure function for checking if all vitals are within range (no I/O)
-        /// </summary>
-        /// <param name="readings">The list of vital readings to check</param>
-        /// <returns>True if all readings are within their normal ranges</returns>
-        public bool AreAllVitalsWithinRange(List<VitalReading> readings) {
-            foreach (var reading in readings) {
-                if (!reading.IsWithinRange) {
-                    return false;
-                }
+        private void CheckPulseRate(int pulseRate, PatientProfile profile) {
+            if (!IsPulseRateWithinRange(pulseRate, profile)) {
+                _alerter.Alert("Pulse Rate critical!");
             }
-            return true;
+        }
+
+        private void CheckOxygenSaturation(float oxygenSaturation, PatientProfile profile) {
+            if (!IsOxygenSaturationWithinRange(oxygenSaturation, profile)) {
+                _alerter.Alert("Oxygen Saturation critical!");
+            }
         }
     }
 }
