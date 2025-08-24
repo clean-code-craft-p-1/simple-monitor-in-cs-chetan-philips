@@ -1,16 +1,19 @@
+using System;
 using System.Collections.Generic;
+
 using HealthMonitor.Models;
+using HealthMonitor.VitalSigns;
 
 namespace HealthMonitor.Core {
     /// <summary>
-    /// Extensible vital signs checker with runtime registration.
+    /// Simplified vital signs checker using action delegate for alerting.
     /// </summary>
     public class VitalsChecker {
-        private readonly IVitalSignAlerter _alerter;
+        private readonly Action<string, string, string> _alertAction;
         private readonly Dictionary<string, IVitalSign> _vitalSigns = new();
 
-        public VitalsChecker(IVitalSignAlerter alerter) {
-            _alerter = alerter;
+        public VitalsChecker(Action<string, string, string> alertAction = null) {
+            _alertAction = alertAction ?? DefaultAlert;
             RegisterDefaultVitalSigns();
         }
 
@@ -33,10 +36,14 @@ namespace HealthMonitor.Core {
             _vitalSigns[vitalSign.Name] = vitalSign;
         }
 
+        private static void DefaultAlert(string vitalName, string value, string unit) {
+            Console.WriteLine($"ALERT: {vitalName} is {value} {unit}");
+        }
+
         private void CheckVital(string vitalName, float value, PatientProfile profile) {
             if (_vitalSigns.TryGetValue(vitalName, out var vitalSign)) {
                 if (!vitalSign.IsWithinRange(value, profile)) {
-                    _alerter.Alert(vitalName, value.ToString("F1"), vitalSign.Unit);
+                    _alertAction(vitalName, value.ToString("F1"), vitalSign.Unit);
                 }
             }
         }
@@ -47,11 +54,11 @@ namespace HealthMonitor.Core {
         }
 
         private void RegisterDefaultVitalSigns() {
-            RegisterVitalSign(new VitalSigns.Temperature());
-            RegisterVitalSign(new VitalSigns.PulseRate());
-            RegisterVitalSign(new VitalSigns.OxygenSaturation());
-            RegisterVitalSign(new VitalSigns.SystolicBloodPressure());
-            RegisterVitalSign(new VitalSigns.DiastolicBloodPressure());
+            RegisterVitalSign(new Temperature());
+            RegisterVitalSign(new PulseRate());
+            RegisterVitalSign(new OxygenSaturation());
+            RegisterVitalSign(new SystolicBloodPressure());
+            RegisterVitalSign(new DiastolicBloodPressure());
         }
     }
 }

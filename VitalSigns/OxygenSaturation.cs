@@ -1,7 +1,7 @@
-using HealthMonitor.Core;
 using HealthMonitor.Models;
 
-namespace HealthMonitor.VitalSigns {
+namespace HealthMonitor.VitalSigns
+{
     /// <summary>
     /// Oxygen saturation vital sign checker with condition-based adjustments.
     /// </summary>
