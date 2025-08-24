@@ -7,20 +7,21 @@ namespace HealthMonitor.Core {
     public class VitalReading {
         private readonly Dictionary<string, float> _readings = new();
 
+        // Default constructor
         public VitalReading() { }
 
-        // Convenient constructors
-        public VitalReading(float temperature, float pulseRate, float oxygenSaturation) {
+        // Constructor with basic vitals
+        public VitalReading(float temperature, float pulseRate, float oxygenSaturation)
+            : this() {
             SetReading("Temperature", temperature);
             SetReading("Pulse Rate", pulseRate);
             SetReading("Oxygen Saturation", oxygenSaturation);
         }
 
+        // Constructor with all standard vitals
         public VitalReading(float temperature, float pulseRate, float oxygenSaturation,
-                          float systolicBP, float diastolicBP) {
-            SetReading("Temperature", temperature);
-            SetReading("Pulse Rate", pulseRate);
-            SetReading("Oxygen Saturation", oxygenSaturation);
+                          float systolicBP, float diastolicBP)
+            : this(temperature, pulseRate, oxygenSaturation) {
             SetReading("Systolic Blood Pressure", systolicBP);
             SetReading("Diastolic Blood Pressure", diastolicBP);
         }

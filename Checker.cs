@@ -32,31 +32,17 @@ namespace HealthMonitor {
             var checker = new VitalsChecker();
 
             Console.WriteLine("\nTesting Normal Vitals:");
-            var normalVitals = new VitalReading(
-                VitalRangeConstants.TEMP_NORMAL, 
-                VitalRangeConstants.PULSE_NORMAL, 
-                VitalRangeConstants.OXY_NORMAL, 
-                VitalRangeConstants.SYS_NORMAL, 
-                VitalRangeConstants.DIA_NORMAL
-            );
+            var normalVitals = VitalReadingFactory.CreateNormalVitals();
             checker.CheckVitals(normalVitals);
 
             Console.WriteLine("\nTesting Abnormal Vitals:");
-            var abnormalVitals = new VitalReading(
-                VitalRangeConstants.TEMP_HIGH, 
-                VitalRangeConstants.PULSE_HIGH, 
-                VitalRangeConstants.OXY_LOW, 
-                VitalRangeConstants.SYS_HIGH, 
-                VitalRangeConstants.DIA_HIGH
-            );
+            var abnormalVitals = VitalReadingFactory.CreateAbnormalVitals();
             checker.CheckVitals(abnormalVitals);
 
             Console.WriteLine("\nDemonstrating Extensibility:");
             checker.RegisterVitalSign(new VitalSigns.RespiratoryRate());
-
-            var extendedVitals = new VitalReading();
-            extendedVitals.SetReading("Temperature", VitalRangeConstants.TEMP_NORMAL);
-            extendedVitals.SetReading("Respiratory Rate", VitalRangeConstants.RESP_HIGH); // High
+            
+            var extendedVitals = VitalReadingFactory.CreateRespiratoryRateReading();
             checker.CheckVitals(extendedVitals);
         }
     }

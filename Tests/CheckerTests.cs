@@ -20,66 +20,34 @@ namespace HealthMonitor.Tests {
 
         public static void TestNormalVitals() {
             var checker = CreateTestVitalsChecker();
-            var normalVitals = new VitalReading(
-                VitalRangeConstants.TEMP_NORMAL, 
-                VitalRangeConstants.PULSE_NORMAL, 
-                VitalRangeConstants.OXY_NORMAL, 
-                VitalRangeConstants.SYS_NORMAL, 
-                VitalRangeConstants.DIA_NORMAL
-            );
+            var normalVitals = VitalReadingFactory.CreateNormalVitals();
 
             AssertVitalsInRange(checker, normalVitals, "Normal vitals should be within range");
         }
 
         public static void TestAbnormalVitals() {
-            // Use our new approach that returns both checker and counter
-            var (checker, getAlertCount) = CreateAlertCountingChecker();
-            var abnormalVitals = new VitalReading(
-                VitalRangeConstants.TEMP_HIGH, 
-                VitalRangeConstants.PULSE_HIGH, 
-                VitalRangeConstants.OXY_LOW, 
-                VitalRangeConstants.SYS_HIGH, 
-                VitalRangeConstants.DIA_HIGH
-            );
+            var abnormalVitals = VitalReadingFactory.CreateAbnormalVitals();
 
-            checker.CheckVitals(abnormalVitals);
-            if (getAlertCount() == 0) {
-                throw new InvalidOperationException("Abnormal vitals should trigger alerts");
-            }
+            AssertTriggersAlerts(abnormalVitals, "Abnormal vitals should trigger alerts");
         }
 
         public static void TestBoundaryConditions() {
             var checker = CreateTestVitalsChecker();
+            
+            // Test lower boundaries (should be within range)
+            AssertVitalsInRange(checker, 
+                CreateAdultBoundaryVitals(isMin: true), 
+                "Lower boundary vitals should be within range");
 
-            // Lower boundaries
-            var lowerVitals = new VitalReading(
-                VitalRangeConstants.TEMP_MIN_ADULT,
-                VitalRangeConstants.PULSE_MIN_ADULT,
-                VitalRangeConstants.OXY_MIN,
-                VitalRangeConstants.SYS_MIN_ADULT,
-                VitalRangeConstants.DIA_MIN_ADULT
-            );
-            AssertVitalsInRange(checker, lowerVitals, "Lower boundary vitals should be within range");
+            // Test upper boundaries (should be within range)
+            AssertVitalsInRange(checker, 
+                CreateAdultBoundaryVitals(isMin: false), 
+                "Upper boundary vitals should be within range");
 
-            // Upper boundaries  
-            var upperVitals = new VitalReading(
-                VitalRangeConstants.TEMP_MAX_ADULT,
-                VitalRangeConstants.PULSE_MAX_ADULT,
-                VitalRangeConstants.OXY_MAX,
-                VitalRangeConstants.SYS_MAX_ADULT,
-                VitalRangeConstants.DIA_MAX_ADULT
-            );
-            AssertVitalsInRange(checker, upperVitals, "Upper boundary vitals should be within range");
-
-            // Below boundaries
-            var belowVitals = new VitalReading(
-                VitalRangeConstants.TEMP_MIN_ADULT - 1,
-                VitalRangeConstants.PULSE_MIN_ADULT - 1,
-                VitalRangeConstants.OXY_MIN - 1,
-                VitalRangeConstants.SYS_MIN_ADULT - 1,
-                VitalRangeConstants.DIA_MIN_ADULT - 1
-            );
-            AssertVitalsOutOfRange(checker, belowVitals, "Below boundary vitals should be out of range");
+            // Test just below lower boundaries (should be out of range)
+            AssertVitalsOutOfRange(checker, 
+                CreateAdultBoundaryVitals(isMin: true, offset: -1), 
+                "Below boundary vitals should be out of range");
         }
 
         public static void TestPatientSpecificRanges() {
@@ -120,17 +88,10 @@ namespace HealthMonitor.Tests {
         }
 
         public static void TestExtensibility() {
-            // Use our new approach that returns both checker and counter
-            var (checker, getAlertCount) = CreateAlertCountingChecker();
-            checker.RegisterVitalSign(new VitalSigns.RespiratoryRate());
-
-            var vitals = new VitalReading();
-            vitals.SetReading("Respiratory Rate", VitalRangeConstants.RESP_HIGH); // High
-            checker.CheckVitals(vitals);
-
-            if (getAlertCount() == 0) {
-                throw new InvalidOperationException("High respiratory rate should trigger alert");
-            }
+            var vitals = VitalReadingFactory.CreateRespiratoryRateReading();
+            
+            AssertTriggersAlerts(vitals, "High respiratory rate should trigger alert", 
+                checker => checker.RegisterVitalSign(new VitalSigns.RespiratoryRate()));
         }
 
         // Helper methods to eliminate duplication
@@ -164,6 +125,29 @@ namespace HealthMonitor.Tests {
             if (checker.AreAllVitalsWithinRange(vitals)) {
                 throw new InvalidOperationException(message);
             }
+        }
+
+        private static void AssertTriggersAlerts(VitalReading vitals, string message, Action<VitalsChecker> setup = null) {
+            var (checker, getAlertCount) = CreateAlertCountingChecker();
+            
+            // Apply any additional setup if provided
+            setup?.Invoke(checker);
+            
+            checker.CheckVitals(vitals);
+            if (getAlertCount() == 0) {
+                throw new InvalidOperationException(message);
+            }
+        }
+        
+        // Helper method to create vitals at boundary values
+        private static VitalReading CreateAdultBoundaryVitals(bool isMin, int offset = 0) {
+            return new VitalReading(
+                (isMin ? VitalRangeConstants.TEMP_MIN_ADULT : VitalRangeConstants.TEMP_MAX_ADULT) + offset,
+                (isMin ? VitalRangeConstants.PULSE_MIN_ADULT : VitalRangeConstants.PULSE_MAX_ADULT) + offset,
+                (isMin ? VitalRangeConstants.OXY_MIN : VitalRangeConstants.OXY_MAX) + offset,
+                (isMin ? VitalRangeConstants.SYS_MIN_ADULT : VitalRangeConstants.SYS_MAX_ADULT) + offset,
+                (isMin ? VitalRangeConstants.DIA_MIN_ADULT : VitalRangeConstants.DIA_MAX_ADULT) + offset
+            );
         }
     }
 }

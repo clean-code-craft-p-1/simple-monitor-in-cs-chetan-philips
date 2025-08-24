@@ -5,14 +5,12 @@ namespace HealthMonitor.VitalSigns
     /// <summary>
     /// Base class for condition-based vital sign checkers to eliminate code duplication.
     /// </summary>
-    public abstract class ConditionBasedVitalSign : IVitalSign 
+    public abstract class ConditionBasedVitalSign : BaseVitalSign 
     {
         // Protected constructor to prevent instantiation except by derived classes
-        protected ConditionBasedVitalSign() { }
-        public abstract string Name { get; }
-        public abstract string Unit { get; }
+        protected ConditionBasedVitalSign() : base() { }
 
-        public bool IsWithinRange(float value, PatientProfile profile = null) 
+        public override bool IsWithinRange(float value, PatientProfile profile = null) 
         {
             var (min, max) = GetConditionSpecificRange(profile);
             return value >= min && value <= max;

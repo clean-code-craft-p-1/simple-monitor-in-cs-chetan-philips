@@ -5,14 +5,12 @@ namespace HealthMonitor.VitalSigns
     /// <summary>
     /// Base class for age-based vital sign checkers to eliminate code duplication.
     /// </summary>
-    public abstract class AgeBasedVitalSign : IVitalSign 
+    public abstract class AgeBasedVitalSign : BaseVitalSign 
     {
         // Protected constructor to prevent instantiation except by derived classes
-        protected AgeBasedVitalSign() { }
-        public abstract string Name { get; }
-        public abstract string Unit { get; }
+        protected AgeBasedVitalSign() : base() { }
 
-        public bool IsWithinRange(float value, PatientProfile profile = null) {
+        public override bool IsWithinRange(float value, PatientProfile profile = null) {
             var (min, max) = GetAgeSpecificRange(profile?.Age);
             return value >= min && value <= max;
         }
