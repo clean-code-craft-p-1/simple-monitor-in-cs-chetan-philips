@@ -33,9 +33,9 @@ namespace HealthMonitor.VitalSigns {
         /// <summary>
         /// Creates a Temperature vital sign
         /// </summary>
-        public static IVitalSign CreateTemperature() => 
+        public static IVitalSign CreateTemperature() =>
             CreateVitalSign(new VitalSignParameters(
-                "Temperature", 
+                "Temperature",
                 "°F",
                 VitalRangeConstants.TEMP_MIN_CHILD, VitalRangeConstants.TEMP_MAX_CHILD,
                 VitalRangeConstants.TEMP_MIN_ADULT, VitalRangeConstants.TEMP_MAX_ADULT,
@@ -44,9 +44,9 @@ namespace HealthMonitor.VitalSigns {
         /// <summary>
         /// Creates a Pulse Rate vital sign
         /// </summary>
-        public static IVitalSign CreatePulseRate() => 
+        public static IVitalSign CreatePulseRate() =>
             CreateVitalSign(new VitalSignParameters(
-                "Pulse Rate", 
+                "Pulse Rate",
                 "BPM",
                 VitalRangeConstants.PULSE_MIN_CHILD, VitalRangeConstants.PULSE_MAX_CHILD,
                 VitalRangeConstants.PULSE_MIN_ADULT, VitalRangeConstants.PULSE_MAX_ADULT,
@@ -63,7 +63,7 @@ namespace HealthMonitor.VitalSigns {
                 VitalRangeConstants.OXY_MIN, VitalRangeConstants.OXY_MAX,
                 VitalRangeConstants.OXY_MIN, VitalRangeConstants.OXY_MAX
             );
-            
+
             var conditionRanges = VitalRangeConstants.GetCopdConditionRanges();
 
             return CreateVitalSignWithConditions(parameters, conditionRanges);
@@ -72,9 +72,9 @@ namespace HealthMonitor.VitalSigns {
         /// <summary>
         /// Creates a Systolic Blood Pressure vital sign
         /// </summary>
-        public static IVitalSign CreateSystolicBP() => 
+        public static IVitalSign CreateSystolicBP() =>
             CreateVitalSign(new VitalSignParameters(
-                "Systolic Blood Pressure", 
+                "Systolic Blood Pressure",
                 "mmHg",
                 VitalRangeConstants.SYS_MIN_CHILD, VitalRangeConstants.SYS_MAX_CHILD,
                 VitalRangeConstants.SYS_MIN_ADULT, VitalRangeConstants.SYS_MAX_ADULT,
@@ -83,9 +83,9 @@ namespace HealthMonitor.VitalSigns {
         /// <summary>
         /// Creates a Diastolic Blood Pressure vital sign
         /// </summary>
-        public static IVitalSign CreateDiastolicBP() => 
+        public static IVitalSign CreateDiastolicBP() =>
             CreateVitalSign(new VitalSignParameters(
-                "Diastolic Blood Pressure", 
+                "Diastolic Blood Pressure",
                 "mmHg",
                 VitalRangeConstants.DIA_MIN_CHILD, VitalRangeConstants.DIA_MAX_CHILD,
                 VitalRangeConstants.DIA_MIN_ADULT, VitalRangeConstants.DIA_MAX_ADULT,
@@ -94,36 +94,36 @@ namespace HealthMonitor.VitalSigns {
         /// <summary>
         /// Creates a Respiratory Rate vital sign
         /// </summary>
-        public static IVitalSign CreateRespiratoryRate() => 
+        public static IVitalSign CreateRespiratoryRate() =>
             CreateVitalSign(new VitalSignParameters(
-                "Respiratory Rate", 
+                "Respiratory Rate",
                 "breaths/min",
                 VitalRangeConstants.RESP_MIN_CHILD, VitalRangeConstants.RESP_MAX_CHILD,
                 VitalRangeConstants.RESP_MIN_ADULT, VitalRangeConstants.RESP_MAX_ADULT,
                 VitalRangeConstants.RESP_MIN_ELDERLY, VitalRangeConstants.RESP_MAX_ELDERLY));
-                
+
         /// <summary>
         /// Helper method to create a vital sign with age-based ranges
         /// </summary>
-        private static IVitalSign CreateVitalSign(VitalSignParameters parameters) {            
+        private static IVitalSign CreateVitalSign(VitalSignParameters parameters) {
             return new ConfigurableVitalSign(
                 CreateBaseConfig(parameters)
             );
         }
-        
+
         /// <summary>
         /// Helper method to create a vital sign with age-based and condition-based ranges
         /// </summary>
         private static IVitalSign CreateVitalSignWithConditions(
             VitalSignParameters parameters,
-            Dictionary<string, (float min, float max)> conditionRanges) {
-            
+            IReadOnlyDictionary<string, (float min, float max)> conditionRanges) {
+
             var baseConfig = CreateBaseConfig(parameters);
             return new ConfigurableVitalSign(
                 new VitalRangeConfig(parameters.Name, parameters.Unit, baseConfig.AgeRanges, conditionRanges)
             );
         }
-        
+
         /// <summary>
         /// Creates a basic vital range configuration with age-based ranges
         /// </summary>
@@ -133,7 +133,7 @@ namespace HealthMonitor.VitalSigns {
                 (parameters.AdultMin, parameters.AdultMax),
                 (parameters.ElderlyMin, parameters.ElderlyMax)
             );
-            
+
             return new VitalRangeConfig(parameters.Name, parameters.Unit, ageRanges);
         }
     }

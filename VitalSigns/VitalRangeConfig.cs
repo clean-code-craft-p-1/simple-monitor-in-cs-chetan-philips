@@ -69,34 +69,48 @@ namespace HealthMonitor.VitalSigns {
         public (float min, float max) GetRange(PatientProfile profile) {
             // Try to get condition-specific range if applicable
             var conditionRange = TryGetConditionRange(profile);
-            if (conditionRange.HasValue)
-            {
+            if (conditionRange.HasValue) {
                 return conditionRange.Value;
             }
 
             // Fall back to age-based ranges
             return AgeRanges.GetRangeForAge(profile?.Age);
         }
-        
+
         /// <summary>
         /// Tries to get a condition-specific range for the patient profile
         /// </summary>
         /// <param name="profile">The patient profile</param>
         /// <returns>The condition-specific range if found; otherwise null</returns>
         private (float min, float max)? TryGetConditionRange(PatientProfile profile) {
-            if (profile?.MedicalConditions == null || !IsConditionBased)
-            {
+            if (!HasValidConditions(profile)) {
                 return null;
             }
 
-            foreach (var condition in profile.MedicalConditions)
-            {
-                if (ConditionRanges.TryGetValue(condition, out var range))
-                {
+            return FindMatchingConditionRange(profile.MedicalConditions);
+        }
+
+        /// <summary>
+        /// Checks if the profile has valid medical conditions and if this vital sign uses condition-based ranges
+        /// </summary>
+        /// <param name="profile">The patient profile to check</param>
+        /// <returns>True if the profile has valid conditions; otherwise false</returns>
+        private bool HasValidConditions(PatientProfile profile) {
+            return profile?.MedicalConditions != null && IsConditionBased;
+        }
+
+        /// <summary>
+        /// Finds a matching condition range from the patient's medical conditions
+        /// </summary>
+        /// <param name="medicalConditions">List of patient's medical conditions</param>
+        /// <returns>The range if a match is found; otherwise null</returns>
+        private (float min, float max)? FindMatchingConditionRange(IEnumerable<string> medicalConditions) {
+            foreach (var condition in medicalConditions) {
+                if (ConditionRanges.TryGetValue(condition, out var range)) {
                     return range;
                 }
             }
-            
+
             return null;
         }
     }
