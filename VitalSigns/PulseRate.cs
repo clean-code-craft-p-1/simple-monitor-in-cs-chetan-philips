@@ -9,11 +9,11 @@ namespace HealthMonitor.VitalSigns {
         public override string Unit => "BPM";
 
         protected override (float min, float max) GetAgeSpecificRange(int? age) {
-            return age switch {
-                < 12 => (70f, 120f),    // Child (higher range)
-                >= 65 => (55f, 105f),   // Elderly (wider tolerance)
-                _ => (60f, 100f)        // Adult
-            };
+            return AgeBasedRangeHelper.GetRangeByAge(age,
+                (VitalRangeConstants.PULSE_MIN_CHILD, VitalRangeConstants.PULSE_MAX_CHILD),
+                (VitalRangeConstants.PULSE_MIN_ELDERLY, VitalRangeConstants.PULSE_MAX_ELDERLY),
+                (VitalRangeConstants.PULSE_MIN_ADULT, VitalRangeConstants.PULSE_MAX_ADULT)
+            );
         }
     }
 }

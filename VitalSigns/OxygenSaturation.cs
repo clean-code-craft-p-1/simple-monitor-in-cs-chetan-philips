@@ -5,20 +5,15 @@ namespace HealthMonitor.VitalSigns
     /// <summary>
     /// Oxygen saturation vital sign checker with condition-based adjustments.
     /// </summary>
-    public class OxygenSaturation : IVitalSign {
-        public string Name => "Oxygen Saturation";
-        public string Unit => "%";
+    public class OxygenSaturation : ConditionBasedVitalSign {
+        public override string Name => "Oxygen Saturation";
+        public override string Unit => "%";
 
-        public bool IsWithinRange(float value, PatientProfile profile = null) {
-            var (min, max) = GetRange(profile);
-            return value >= min && value <= max;
-        }
-
-        private static (float min, float max) GetRange(PatientProfile profile) {
+        protected override (float min, float max) GetConditionSpecificRange(PatientProfile profile) {
             if (HasCOPD(profile)) {
-                return (85f, 100f);  // COPD patients have lower acceptable minimum
+                return (VitalRangeConstants.OXY_COPD, VitalRangeConstants.OXY_MAX);  // COPD patients have lower acceptable minimum
             }
-            return (90f, 100f);      // Normal range
+            return (VitalRangeConstants.OXY_MIN, VitalRangeConstants.OXY_MAX);      // Normal range
         }
 
         private static bool HasCOPD(PatientProfile profile) {
