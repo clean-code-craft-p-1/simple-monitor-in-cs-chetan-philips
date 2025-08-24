@@ -53,7 +53,13 @@ namespace HealthMonitor.Tests {
         public static void TestPatientSpecificRanges() {
             var checker = CreateTestVitalsChecker();
 
-            // Elderly patient
+            // Test various patient profiles
+            TestElderlyPatient(checker);
+            TestChildPatient(checker);
+            TestCopdPatient(checker);
+        }
+        
+        private static void TestElderlyPatient(VitalsChecker checker) {
             var elderly = new PatientProfile { Age = VitalRangeConstants.ELDERLY_MIN_AGE + 5 };
             var elderlyVitals = new VitalReading(
                 VitalRangeConstants.TEMP_MIN_ELDERLY,
@@ -63,8 +69,9 @@ namespace HealthMonitor.Tests {
                 VitalRangeConstants.DIA_MAX_ELDERLY - 3
             );
             AssertVitalsInRange(checker, elderlyVitals, elderly, "Elderly patient vitals should be within adjusted range");
-
-            // Child patient
+        }
+        
+        private static void TestChildPatient(VitalsChecker checker) {
             var child = new PatientProfile { Age = VitalRangeConstants.CHILD_MAX_AGE - 4 };
             var childVitals = new VitalReading(
                 VitalRangeConstants.TEMP_MAX_CHILD,
@@ -74,9 +81,11 @@ namespace HealthMonitor.Tests {
                 VitalRangeConstants.DIA_MAX_CHILD - 5
             );
             AssertVitalsInRange(checker, childVitals, child, "Child patient vitals should be within adjusted range");
-
-            // COPD patient
-            var copd = new PatientProfile { Age = VitalRangeConstants.ELDERLY_MIN_AGE, MedicalConditions = "COPD" };
+        }
+        
+        private static void TestCopdPatient(VitalsChecker checker) {
+            var copd = new PatientProfile { Age = VitalRangeConstants.ELDERLY_MIN_AGE };
+            copd.MedicalConditions.Add("COPD");
             var copdVitals = new VitalReading(
                 VitalRangeConstants.TEMP_NORMAL,
                 VitalRangeConstants.PULSE_NORMAL,
@@ -91,7 +100,7 @@ namespace HealthMonitor.Tests {
             var vitals = VitalReadingFactory.CreateRespiratoryRateReading();
 
             AssertTriggersAlerts(vitals, "High respiratory rate should trigger alert",
-                checker => checker.RegisterVitalSign(new VitalSigns.RespiratoryRate()));
+                checker => checker.RegisterVitalSign(VitalSignFactory.CreateRespiratoryRate()));
         }
 
         // Helper methods to eliminate duplication

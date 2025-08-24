@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace HealthMonitor.VitalSigns {
     /// <summary>
     /// Constants for vital sign ranges and age thresholds
@@ -64,5 +66,15 @@ namespace HealthMonitor.VitalSigns {
         public const float RESP_MIN_ADULT = 12f;
         public const float RESP_MAX_ADULT = 20f;
         public const float RESP_HIGH = 25f;
+        
+        /// <summary>
+        /// Creates a dictionary with COPD condition ranges
+        /// </summary>
+        /// <returns>Dictionary containing condition ranges for COPD</returns>
+        public static IReadOnlyDictionary<string, (float min, float max)> GetCopdConditionRanges() {
+            return new Dictionary<string, (float min, float max)> {
+                { "COPD", (OXY_COPD, OXY_MAX) }
+            };
+        }
     }
 }

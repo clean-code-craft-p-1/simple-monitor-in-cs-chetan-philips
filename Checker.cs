@@ -1,6 +1,7 @@
 using System;
 
 using HealthMonitor.Core;
+using HealthMonitor.VitalSigns;
 
 namespace HealthMonitor {
     /// <summary>
@@ -39,7 +40,8 @@ namespace HealthMonitor {
             checker.CheckVitals(abnormalVitals);
 
             Console.WriteLine("\nDemonstrating Extensibility:");
-            checker.RegisterVitalSign(new VitalSigns.RespiratoryRate());
+            // Use the factory to create a respiratory rate vital sign
+            checker.RegisterVitalSign(VitalSignFactory.CreateRespiratoryRate());
 
             var extendedVitals = VitalReadingFactory.CreateRespiratoryRateReading();
             checker.CheckVitals(extendedVitals);

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace HealthMonitor.Models {
     /// <summary>
     /// Patient profile with demographic and medical information.
@@ -18,6 +20,6 @@ namespace HealthMonitor.Models {
         /// Gets or sets the patient's medical conditions.
         /// Used for condition-specific vital sign adjustments.
         /// </summary>
-        public string MedicalConditions { get; set; }
+        public List<string> MedicalConditions { get; set; } = new List<string>();
     }
 }

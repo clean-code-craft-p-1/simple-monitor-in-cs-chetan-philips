@@ -54,11 +54,11 @@ namespace HealthMonitor.Core {
         }
 
         private void RegisterDefaultVitalSigns() {
-            RegisterVitalSign(new Temperature());
-            RegisterVitalSign(new PulseRate());
-            RegisterVitalSign(new OxygenSaturation());
-            RegisterVitalSign(new SystolicBloodPressure());
-            RegisterVitalSign(new DiastolicBloodPressure());
+            // Use the factory to create vital signs with configurations
+            var vitalSigns = VitalSignFactory.CreateStandardVitalSigns();
+            foreach (var vitalSign in vitalSigns.Values) {
+                RegisterVitalSign(vitalSign);
+            }
         }
     }
 }
