@@ -6,9 +6,11 @@ namespace HealthMonitor.VitalSigns {
         public DiastolicBloodPressure() : base(
             "Diastolic Blood Pressure",
             "mmHg",
-            (VitalRangeConstants.DIA_MIN_CHILD, VitalRangeConstants.DIA_MAX_CHILD),
-            (VitalRangeConstants.DIA_MIN_ELDERLY, VitalRangeConstants.DIA_MAX_ELDERLY),
-            (VitalRangeConstants.DIA_MIN_ADULT, VitalRangeConstants.DIA_MAX_ADULT)
+            new AgeRanges(
+                (VitalRangeConstants.DIA_MIN_CHILD, VitalRangeConstants.DIA_MAX_CHILD),
+                (VitalRangeConstants.DIA_MIN_ELDERLY, VitalRangeConstants.DIA_MAX_ELDERLY),
+                (VitalRangeConstants.DIA_MIN_ADULT, VitalRangeConstants.DIA_MAX_ADULT)
+            )
         ) { }
     }
 }

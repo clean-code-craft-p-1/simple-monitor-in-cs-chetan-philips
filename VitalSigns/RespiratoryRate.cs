@@ -6,9 +6,11 @@ namespace HealthMonitor.VitalSigns {
         public RespiratoryRate() : base(
             "Respiratory Rate",
             "breaths/min",
-            (VitalRangeConstants.RESP_MIN_CHILD, VitalRangeConstants.RESP_MAX_CHILD),
-            (VitalRangeConstants.RESP_MIN_ELDERLY, VitalRangeConstants.RESP_MAX_ELDERLY),
-            (VitalRangeConstants.RESP_MIN_ADULT, VitalRangeConstants.RESP_MAX_ADULT)
+            new AgeRanges(
+                (VitalRangeConstants.RESP_MIN_CHILD, VitalRangeConstants.RESP_MAX_CHILD),
+                (VitalRangeConstants.RESP_MIN_ELDERLY, VitalRangeConstants.RESP_MAX_ELDERLY),
+                (VitalRangeConstants.RESP_MIN_ADULT, VitalRangeConstants.RESP_MAX_ADULT)
+            )
         ) { }
     }
 }

@@ -6,9 +6,11 @@ namespace HealthMonitor.VitalSigns {
         public SystolicBloodPressure() : base(
             "Systolic Blood Pressure",
             "mmHg",
-            (VitalRangeConstants.SYS_MIN_CHILD, VitalRangeConstants.SYS_MAX_CHILD),
-            (VitalRangeConstants.SYS_MIN_ELDERLY, VitalRangeConstants.SYS_MAX_ELDERLY),
-            (VitalRangeConstants.SYS_MIN_ADULT, VitalRangeConstants.SYS_MAX_ADULT)
+            new AgeRanges(
+                (VitalRangeConstants.SYS_MIN_CHILD, VitalRangeConstants.SYS_MAX_CHILD),
+                (VitalRangeConstants.SYS_MIN_ELDERLY, VitalRangeConstants.SYS_MAX_ELDERLY),
+                (VitalRangeConstants.SYS_MIN_ADULT, VitalRangeConstants.SYS_MAX_ADULT)
+            )
         ) { }
     }
 }

@@ -6,9 +6,11 @@ namespace HealthMonitor.VitalSigns {
         public Temperature() : base(
             "Temperature",
             "°F",
-            (VitalRangeConstants.TEMP_MIN_CHILD, VitalRangeConstants.TEMP_MAX_CHILD),
-            (VitalRangeConstants.TEMP_MIN_ELDERLY, VitalRangeConstants.TEMP_MAX_ELDERLY),
-            (VitalRangeConstants.TEMP_MIN_ADULT, VitalRangeConstants.TEMP_MAX_ADULT)
+            new AgeRanges(
+                (VitalRangeConstants.TEMP_MIN_CHILD, VitalRangeConstants.TEMP_MAX_CHILD),
+                (VitalRangeConstants.TEMP_MIN_ELDERLY, VitalRangeConstants.TEMP_MAX_ELDERLY),
+                (VitalRangeConstants.TEMP_MIN_ADULT, VitalRangeConstants.TEMP_MAX_ADULT)
+            )
         ) { }
     }
 }

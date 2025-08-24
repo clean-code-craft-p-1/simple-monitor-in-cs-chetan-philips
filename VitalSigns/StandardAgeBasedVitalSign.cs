@@ -8,15 +8,13 @@ namespace HealthMonitor.VitalSigns {
         private readonly string _unit;
         private readonly AgeRanges _ranges;
 
-        public StandardAgeBasedVitalSign(
-            string name,
-            string unit,
-            (float min, float max) childRange,
-            (float min, float max) elderlyRange,
-            (float min, float max) adultRange) {
+        /// <summary>
+        /// Creates a new vital sign with the specified name, unit, and age ranges
+        /// </summary>
+        public StandardAgeBasedVitalSign(string name, string unit, AgeRanges ranges) {
             _name = name;
             _unit = unit;
-            _ranges = new AgeRanges(childRange, elderlyRange, adultRange);
+            _ranges = ranges;
         }
 
         public override string Name => _name;
