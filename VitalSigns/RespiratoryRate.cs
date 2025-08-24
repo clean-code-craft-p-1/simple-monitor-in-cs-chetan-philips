@@ -1,12 +1,8 @@
-using HealthMonitor.Models;
-
-namespace HealthMonitor.VitalSigns
-{
+namespace HealthMonitor.VitalSigns {
     /// <summary>
     /// Respiratory rate vital sign for monitoring breathing frequency.
     /// </summary>
-    public class RespiratoryRate : StandardAgeBasedVitalSign
-    {
+    public class RespiratoryRate : StandardAgeBasedVitalSign {
         public RespiratoryRate() : base(
             "Respiratory Rate",
             "breaths/min",

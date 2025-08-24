@@ -1,7 +1,6 @@
 using System;
 
 using HealthMonitor.Core;
-using HealthMonitor.VitalSigns;
 
 namespace HealthMonitor {
     /// <summary>
@@ -41,7 +40,7 @@ namespace HealthMonitor {
 
             Console.WriteLine("\nDemonstrating Extensibility:");
             checker.RegisterVitalSign(new VitalSigns.RespiratoryRate());
-            
+
             var extendedVitals = VitalReadingFactory.CreateRespiratoryRateReading();
             checker.CheckVitals(extendedVitals);
         }

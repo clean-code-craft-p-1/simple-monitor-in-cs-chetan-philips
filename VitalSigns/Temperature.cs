@@ -1,5 +1,3 @@
-using HealthMonitor.Models;
-
 namespace HealthMonitor.VitalSigns {
     /// <summary>
     /// Temperature vital sign checker with age-based adjustments.

@@ -1,5 +1,3 @@
-using HealthMonitor.Models;
-
 namespace HealthMonitor.VitalSigns {
     /// <summary>
     /// Diastolic blood pressure vital sign checker.

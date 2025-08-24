@@ -1,18 +1,15 @@
 using HealthMonitor.Models;
 
-namespace HealthMonitor.VitalSigns
-{
+namespace HealthMonitor.VitalSigns {
     /// <summary>
     /// Base class for age-based vital sign checkers to eliminate code duplication.
     /// </summary>
-    public abstract class AgeBasedVitalSign : BaseVitalSign 
-    {
+    public abstract class AgeBasedVitalSign : BaseVitalSign {
         // Protected constructor to prevent instantiation except by derived classes
         protected AgeBasedVitalSign() : base() { }
 
-        public override bool IsWithinRange(float value, PatientProfile profile = null) {
-            var (min, max) = GetAgeSpecificRange(profile?.Age);
-            return value >= min && value <= max;
+        protected override (float min, float max) GetRange(float value, PatientProfile profile) {
+            return GetAgeSpecificRange(profile?.Age);
         }
 
         protected abstract (float min, float max) GetAgeSpecificRange(int? age);

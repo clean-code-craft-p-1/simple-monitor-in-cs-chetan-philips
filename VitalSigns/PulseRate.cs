@@ -1,5 +1,3 @@
-using HealthMonitor.Models;
-
 namespace HealthMonitor.VitalSigns {
     /// <summary>
     /// Pulse rate vital sign checker with age-based adjustments.
