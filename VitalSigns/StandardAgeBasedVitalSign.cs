@@ -6,9 +6,7 @@ namespace HealthMonitor.VitalSigns {
     public class StandardAgeBasedVitalSign : AgeBasedVitalSign {
         private readonly string _name;
         private readonly string _unit;
-        private readonly (float min, float max) _childRange;
-        private readonly (float min, float max) _elderlyRange;
-        private readonly (float min, float max) _adultRange;
+        private readonly AgeRanges _ranges;
 
         public StandardAgeBasedVitalSign(
             string name,
@@ -18,16 +16,14 @@ namespace HealthMonitor.VitalSigns {
             (float min, float max) adultRange) {
             _name = name;
             _unit = unit;
-            _childRange = childRange;
-            _elderlyRange = elderlyRange;
-            _adultRange = adultRange;
+            _ranges = new AgeRanges(childRange, elderlyRange, adultRange);
         }
 
         public override string Name => _name;
         public override string Unit => _unit;
 
         protected override (float min, float max) GetAgeSpecificRange(int? age) {
-            return AgeBasedRangeHelper.GetRangeByAge(age, _childRange, _elderlyRange, _adultRange);
+            return AgeBasedRangeHelper.GetRangeByAge(age, _ranges);
         }
     }
 }

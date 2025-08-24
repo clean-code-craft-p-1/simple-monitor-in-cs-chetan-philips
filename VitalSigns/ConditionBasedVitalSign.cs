@@ -5,8 +5,8 @@ namespace HealthMonitor.VitalSigns {
     /// Base class for condition-based vital sign checkers to eliminate code duplication.
     /// </summary>
     public abstract class ConditionBasedVitalSign : BaseVitalSign {
-        // Protected constructor to prevent instantiation except by derived classes
-        protected ConditionBasedVitalSign() : base() { }
+        // Default constructor
+        protected ConditionBasedVitalSign() { }
 
         protected override (float min, float max) GetRange(float value, PatientProfile profile) {
             return GetConditionSpecificRange(profile);
