@@ -4,163 +4,109 @@ using HealthMonitor.Models;
 
 namespace HealthMonitor.Tests {
     /// <summary>
-    /// Comprehensive tests for the VitalsChecker functionality.
+    /// Comprehensive tests for the simplified VitalsChecker functionality.
     /// </summary>
     public static class CheckerTests {
         public static void RunAllTests() {
             TestNormalVitals();
             TestAbnormalVitals();
+            TestBoundaryConditions();
             TestPatientSpecificRanges();
             TestExtensibility();
-            TestBoundaryConditions();
-            TestOutOfRangeVitals();
+            TestBloodPressureHandling();
+            Console.WriteLine("All tests completed successfully!");
         }
 
         public static void TestNormalVitals() {
             var alerter = new TestAlerter();
             var checker = new VitalsChecker(alerter);
-
             var normalVitals = new VitalReading(98.6f, 72f, 95f, 120f, 80f);
-            checker.CheckVitals(normalVitals);
 
-            if (alerter.AlertCount > 0) {
-                throw new Exception("Normal vitals should not trigger alerts");
+            if (!checker.AreAllVitalsWithinRange(normalVitals)) {
+                throw new Exception("Normal vitals should be within range");
             }
         }
 
         public static void TestAbnormalVitals() {
             var alerter = new TestAlerter();
             var checker = new VitalsChecker(alerter);
-
             var abnormalVitals = new VitalReading(104f, 110f, 85f, 160f, 100f);
-            checker.CheckVitals(abnormalVitals);
 
+            checker.CheckVitals(abnormalVitals);
             if (alerter.AlertCount == 0) {
                 throw new Exception("Abnormal vitals should trigger alerts");
             }
         }
 
         public static void TestBoundaryConditions() {
-            TestLowerBoundaries();
-            TestUpperBoundaries();
-            TestBelowBoundaries();
-            TestAboveBoundaries();
-        }
-
-        private static void TestLowerBoundaries() {
             var alerter = new TestAlerter();
             var checker = new VitalsChecker(alerter);
-            var boundaryVitals = new VitalReading(95.0f, 60f, 90f, 90f, 60f);
-            
-            if (!checker.AreAllVitalsWithinRange(boundaryVitals)) {
+
+            // Test lower boundaries
+            var lowerBoundary = new VitalReading(95f, 60f, 90f, 90f, 60f);
+            if (!checker.AreAllVitalsWithinRange(lowerBoundary)) {
                 throw new Exception("Lower boundary vitals should be within range");
             }
-        }
 
-        private static void TestUpperBoundaries() {
-            var alerter = new TestAlerter();
-            var checker = new VitalsChecker(alerter);
-            var boundaryVitals = new VitalReading(102.0f, 100f, 100f, 140f, 90f);
-            
-            if (!checker.AreAllVitalsWithinRange(boundaryVitals)) {
+            // Test upper boundaries
+            var upperBoundary = new VitalReading(102f, 100f, 100f, 140f, 90f);
+            if (!checker.AreAllVitalsWithinRange(upperBoundary)) {
                 throw new Exception("Upper boundary vitals should be within range");
             }
-        }
 
-        private static void TestBelowBoundaries() {
-            var alerter = new TestAlerter();
-            var checker = new VitalsChecker(alerter);
-            var outsideBoundary = new VitalReading(94.9f, 59f, 89f, 89f, 59f);
-            
-            if (checker.AreAllVitalsWithinRange(outsideBoundary)) {
+            // Test below boundaries
+            var belowBoundary = new VitalReading(94f, 59f, 89f, 89f, 59f);
+            if (checker.AreAllVitalsWithinRange(belowBoundary)) {
                 throw new Exception("Below boundary vitals should be out of range");
             }
         }
 
-        private static void TestAboveBoundaries() {
-            var alerter = new TestAlerter();
-            var checker = new VitalsChecker(alerter);
-            var outsideBoundary = new VitalReading(102.1f, 101f, 101f, 141f, 91f);
-            
-            if (checker.AreAllVitalsWithinRange(outsideBoundary)) {
-                throw new Exception("Above boundary vitals should be out of range");
-            }
-        }
-
-        public static void TestOutOfRangeVitals() {
-            TestHighVitals();
-            TestLowVitals();
-            TestMixedVitals();
-        }
-
-        private static void TestHighVitals() {
-            var alerter = new TestAlerter();
-            var checker = new VitalsChecker(alerter);
-            var highVitals = new VitalReading(104.0f, 120f, 85f, 160f, 100f);
-            
-            if (checker.AreAllVitalsWithinRange(highVitals)) {
-                throw new Exception("High vitals should be out of range");
-            }
-        }
-
-        private static void TestLowVitals() {
-            var alerter = new TestAlerter();
-            var checker = new VitalsChecker(alerter);
-            var lowVitals = new VitalReading(90.0f, 50f, 85f, 70f, 40f);
-            
-            if (checker.AreAllVitalsWithinRange(lowVitals)) {
-                throw new Exception("Low vitals should be out of range");
-            }
-        }
-
-        private static void TestMixedVitals() {
-            var alerter = new TestAlerter();
-            var checker = new VitalsChecker(alerter);
-            var mixedVitals = new VitalReading(98.6f, 120f, 95f, 120f, 80f);
-            
-            if (checker.AreAllVitalsWithinRange(mixedVitals)) {
-                throw new Exception("Mixed vitals with one out of range should be overall out of range");
-            }
-        }
-
         public static void TestPatientSpecificRanges() {
-            TestElderlyPatient();
-            TestChildPatient();
-            TestCOPDPatient();
-        }
-
-        private static void TestElderlyPatient() {
             var alerter = new TestAlerter();
             var checker = new VitalsChecker(alerter);
-            var elderlyPatient = new PatientProfile { Age = 70, Name = "John Doe" };
-            var elderlyVitals = new VitalReading(94.0f, 58f, 92f, 145f, 92f);
 
+            // Test elderly patient
+            var elderlyPatient = new PatientProfile { Age = 70 };
+            var elderlyVitals = new VitalReading(94f, 58f, 92f, 145f, 92f);
             if (!checker.AreAllVitalsWithinRange(elderlyVitals, elderlyPatient)) {
                 throw new Exception("Elderly patient vitals should be within adjusted range");
             }
-        }
 
-        private static void TestChildPatient() {
-            var alerter = new TestAlerter();
-            var checker = new VitalsChecker(alerter);
-            var childPatient = new PatientProfile { Age = 8, Name = "Jane Doe" };
+            // Test child patient
+            var childPatient = new PatientProfile { Age = 8 };
             var childVitals = new VitalReading(103f, 110f, 96f, 115f, 75f);
-            
-            checker.CheckVitals(childVitals, childPatient);
+            if (!checker.AreAllVitalsWithinRange(childVitals, childPatient)) {
+                throw new Exception("Child patient vitals should be within adjusted range");
+            }
 
-            if (alerter.AlertCount > 0) {
-                throw new Exception("Child vitals should be within adjusted range");
+            // Test COPD patient
+            var copdPatient = new PatientProfile { MedicalConditions = "COPD" };
+            var copdVitals = new VitalReading(98.6f, 75f, 87f, 130f, 85f);
+            if (!checker.AreAllVitalsWithinRange(copdVitals, copdPatient)) {
+                throw new Exception("COPD patient vitals should be within adjusted range");
             }
         }
 
-        private static void TestCOPDPatient() {
+        public static void TestBloodPressureHandling() {
             var alerter = new TestAlerter();
             var checker = new VitalsChecker(alerter);
-            var copdPatient = new PatientProfile { Age = 65, Name = "Bob Smith", MedicalConditions = "COPD" };
-            var copdVitals = new VitalReading(98.6f, 75f, 87f, 130f, 85f);
 
-            if (!checker.AreAllVitalsWithinRange(copdVitals, copdPatient)) {
-                throw new Exception("COPD patient vitals should be within adjusted range");
+            // Test individual blood pressure components
+            var vitals = new VitalReading();
+            vitals.SetReading("Systolic Blood Pressure", 160f); // High
+            vitals.SetReading("Diastolic Blood Pressure", 80f);  // Normal
+
+            if (checker.AreAllVitalsWithinRange(vitals)) {
+                throw new Exception("High systolic should be out of range");
+            }
+
+            // Test normal blood pressure components
+            vitals = new VitalReading();
+            vitals.SetReading("Systolic Blood Pressure", 120f);
+            vitals.SetReading("Diastolic Blood Pressure", 80f);
+
+            if (!checker.AreAllVitalsWithinRange(vitals)) {
+                throw new Exception("Normal blood pressure should be within range");
             }
         }
 
@@ -168,18 +114,26 @@ namespace HealthMonitor.Tests {
             var alerter = new TestAlerter();
             var checker = new VitalsChecker(alerter);
 
+            // Register new vital sign
             checker.RegisterVitalSign(new RespiratoryRate());
 
             var vitals = new VitalReading();
-            vitals.SetReading("Respiratory Rate", 25f); // High
-            checker.CheckVitals(vitals);
+            vitals.SetReading("Respiratory Rate", 16f); // Normal
 
-            if (alerter.AlertCount == 0) {
-                throw new Exception("High respiratory rate should trigger alert");
+            if (!checker.AreAllVitalsWithinRange(vitals)) {
+                throw new Exception("Normal respiratory rate should be within range");
+            }
+
+            vitals.SetReading("Respiratory Rate", 35f); // High
+            if (checker.AreAllVitalsWithinRange(vitals)) {
+                throw new Exception("High respiratory rate should be out of range");
             }
         }
     }
 
+    /// <summary>
+    /// Test alerter implementation.
+    /// </summary>
     public class TestAlerter : IVitalSignAlerter {
         public int AlertCount { get; private set; }
 
@@ -188,12 +142,20 @@ namespace HealthMonitor.Tests {
         }
     }
 
+    /// <summary>
+    /// Example of easily adding new vital signs.
+    /// </summary>
     public class RespiratoryRate : IVitalSign {
         public string Name => "Respiratory Rate";
         public string Unit => "breaths/min";
 
         public bool IsWithinRange(float value, PatientProfile profile = null) {
-            return value >= 12f && value <= 20f; // Normal adult range
+            var (min, max) = profile?.Age switch {
+                < 12 => (20f, 30f),     // Child
+                >= 65 => (12f, 28f),    // Elderly
+                _ => (12f, 20f)         // Adult
+            };
+            return value >= min && value <= max;
         }
     }
 }

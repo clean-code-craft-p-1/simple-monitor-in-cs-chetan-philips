@@ -18,7 +18,6 @@ namespace HealthMonitor.Core {
             foreach (var vitalName in vitals.GetVitalNames()) {
                 CheckVital(vitalName, vitals.GetReading(vitalName), profile);
             }
-            CheckBloodPressureIfAvailable(vitals, profile);
         }
 
         public bool AreAllVitalsWithinRange(VitalReading vitals, PatientProfile profile = null) {
@@ -27,7 +26,7 @@ namespace HealthMonitor.Core {
                     return false;
                 }
             }
-            return CheckBloodPressureRange(vitals, profile);
+            return true;
         }
 
         public void RegisterVitalSign(IVitalSign vitalSign) {
@@ -43,44 +42,16 @@ namespace HealthMonitor.Core {
         }
 
         private bool IsVitalWithinRange(string vitalName, float value, PatientProfile profile) {
-            return !_vitalSigns.TryGetValue(vitalName, out var vitalSign) || 
+            return !_vitalSigns.TryGetValue(vitalName, out var vitalSign) ||
                    vitalSign.IsWithinRange(value, profile);
-        }
-
-        private void CheckBloodPressureIfAvailable(VitalReading vitals, PatientProfile profile) {
-            if (vitals.HasReading("Systolic Blood Pressure") && 
-                vitals.HasReading("Diastolic Blood Pressure")) {
-                CheckBloodPressure(vitals.SystolicBloodPressure, vitals.DiastolicBloodPressure, profile);
-            }
-        }
-
-        private bool CheckBloodPressureRange(VitalReading vitals, PatientProfile profile) {
-            if (!vitals.HasReading("Systolic Blood Pressure") || 
-                !vitals.HasReading("Diastolic Blood Pressure")) {
-                return true;
-            }
-            
-            if (_vitalSigns.TryGetValue("Blood Pressure", out var bp) && 
-                bp is VitalSigns.BloodPressure bloodPressure) {
-                return bloodPressure.IsWithinRange(vitals.SystolicBloodPressure, vitals.DiastolicBloodPressure, profile);
-            }
-            return true;
-        }
-
-        private void CheckBloodPressure(float systolic, float diastolic, PatientProfile profile) {
-            if (_vitalSigns.TryGetValue("Blood Pressure", out var bp) && 
-                bp is VitalSigns.BloodPressure bloodPressure) {
-                if (!bloodPressure.IsWithinRange(systolic, diastolic, profile)) {
-                    _alerter.Alert("Blood Pressure", $"{systolic:F0}/{diastolic:F0}", bp.Unit);
-                }
-            }
         }
 
         private void RegisterDefaultVitalSigns() {
             RegisterVitalSign(new VitalSigns.Temperature());
             RegisterVitalSign(new VitalSigns.PulseRate());
             RegisterVitalSign(new VitalSigns.OxygenSaturation());
-            RegisterVitalSign(new VitalSigns.BloodPressure());
+            RegisterVitalSign(new VitalSigns.SystolicBloodPressure());
+            RegisterVitalSign(new VitalSigns.DiastolicBloodPressure());
         }
     }
 }

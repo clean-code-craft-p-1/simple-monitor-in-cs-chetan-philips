@@ -9,13 +9,14 @@ namespace HealthMonitor.Core {
 
         public VitalReading() { }
 
+        // Convenient constructors
         public VitalReading(float temperature, float pulseRate, float oxygenSaturation) {
             SetReading("Temperature", temperature);
             SetReading("Pulse Rate", pulseRate);
             SetReading("Oxygen Saturation", oxygenSaturation);
         }
 
-        public VitalReading(float temperature, float pulseRate, float oxygenSaturation, 
+        public VitalReading(float temperature, float pulseRate, float oxygenSaturation,
                           float systolicBP, float diastolicBP) {
             SetReading("Temperature", temperature);
             SetReading("Pulse Rate", pulseRate);
@@ -39,12 +40,5 @@ namespace HealthMonitor.Core {
         public IEnumerable<string> GetVitalNames() {
             return _readings.Keys;
         }
-
-        // Legacy properties
-        public float Temperature => GetReading("Temperature");
-        public float PulseRate => GetReading("Pulse Rate");
-        public float OxygenSaturation => GetReading("Oxygen Saturation");
-        public float SystolicBloodPressure => GetReading("Systolic Blood Pressure");
-        public float DiastolicBloodPressure => GetReading("Diastolic Blood Pressure");
     }
 }
